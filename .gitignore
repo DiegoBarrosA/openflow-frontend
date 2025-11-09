@@ -1,0 +1,61 @@
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Build output
+dist/
+build/
+.vite/
+.next/
+out/
+
+# Environment
+.env
+.env.local
+.env.*.local
+.env.production
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Testing
+coverage/
+.nyc_output/
+test-results/
+
+# Input/Output files
+*.csv
+*.xlsx
+*.xls
+*.json
+*.xml
+*.yaml
+*.yml
+!package.json
+!tsconfig.json
+!vite.config.*
+!tailwind.config.*
+!postcss.config.*
+!**/src/**/*.json
+!**/src/**/*.xml
+!**/src/**/*.yaml
+!**/src/**/*.yml
+

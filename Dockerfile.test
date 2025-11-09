@@ -1,0 +1,17 @@
+# Test Dockerfile for running tests in container
+FROM docker.io/library/node:18-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY package.json package-lock.json* ./
+
+# Install dependencies
+RUN npm ci
+
+# Copy source code
+COPY . .
+
+# Default command runs tests
+CMD ["npm", "test"]
+
