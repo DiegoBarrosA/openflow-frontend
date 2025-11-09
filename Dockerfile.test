@@ -15,3 +15,6 @@ COPY . .
 # Default command runs tests
 CMD ["npm", "test"]
 
+
+
+
