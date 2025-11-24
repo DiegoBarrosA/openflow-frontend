@@ -48,7 +48,7 @@ jobs:
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
       - name: Dispatch deploy request
-        if: ${{ secrets.DEPLOY_REPO_TOKEN != '' }}
+        if: ${{ secrets.DEPLOY_REPO_TOKEN }}
         run: |
           echo "Triggering deployment in deployment repo"
           payload=$(jq -n --arg b "" --arg f "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}" '{backend_image:$b,frontend_image:$f}')
