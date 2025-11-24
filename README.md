@@ -18,6 +18,7 @@ npm install
 npm run dev
 ```
 
+
 ## Documentation
 
 Comprehensive documentation is available in the `/docs` directory:
@@ -66,7 +67,3 @@ Production build outputs to `dist/` directory.
 ## License
 
 [Add license information]
-
-
-
-
