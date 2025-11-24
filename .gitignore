@@ -49,6 +49,7 @@ test-results/
 *.yaml
 *.yml
 !package.json
+!package-lock.json
 !tsconfig.json
 !vite.config.*
 !tailwind.config.*
@@ -57,6 +58,3 @@ test-results/
 !**/src/**/*.xml
 !**/src/**/*.yaml
 !**/src/**/*.yml
-
-
-
