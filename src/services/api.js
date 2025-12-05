@@ -41,5 +41,12 @@ api.interceptors.response.use(
   }
 );
 
+// Azure AD login function
+export const azureLogin = () => {
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
+    (import.meta.env.PROD ? '/api' : 'http://localhost:31294/api');
+  window.location.href = `${API_BASE_URL.replace('/api', '')}/oauth2/authorization/azure`;
+};
+
 export default api;
 

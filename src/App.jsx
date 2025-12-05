@@ -4,6 +4,7 @@ import Login from './components/Login';
 import Register from './components/Register';
 import BoardList from './components/BoardList';
 import Board from './components/Board';
+import OAuthCallback from './components/OAuthCallback';
 
 const PrivateRoute = ({ children }) => {
   const token = localStorage.getItem('token');
@@ -17,6 +18,7 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/oauth2/callback" element={<OAuthCallback />} />
           <Route
             path="/boards"
             element={

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import api from '../services/api';
+import api, { azureLogin } from '../services/api';
 
 function Login() {
   const [username, setUsername] = useState('');
@@ -79,6 +79,31 @@ function Login() {
             Login
           </button>
         </form>
+        
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-300"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-2 bg-white text-gray-500">Or</span>
+          </div>
+        </div>
+        
+        <button
+          type="button"
+          onClick={azureLogin}
+          className="w-full bg-white text-gray-700 py-3 sm:py-2.5 px-4 rounded-md border-2 border-gray-300 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#82AAFF] focus:ring-offset-2 transition-colors shadow-md touch-target text-base sm:text-sm font-medium flex items-center justify-center gap-2"
+          aria-label="Sign in with Microsoft"
+        >
+          <svg className="w-5 h-5" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0 0H10.7778V10.7778H0V0Z" fill="#F25022"/>
+            <path d="M12.2222 0H23V10.7778H12.2222V0Z" fill="#7FBA00"/>
+            <path d="M0 12.2222H10.7778V23H0V12.2222Z" fill="#00A4EF"/>
+            <path d="M12.2222 12.2222H23V23H12.2222V12.2222Z" fill="#FFB900"/>
+          </svg>
+          Sign in with Microsoft
+        </button>
+        
         <p className="text-center mt-6 text-gray-600 text-sm sm:text-base">
           Don't have an account?{' '}
           <Link 
