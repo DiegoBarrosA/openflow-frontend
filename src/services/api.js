@@ -43,9 +43,18 @@ api.interceptors.response.use(
 
 // Azure AD login function
 export const azureLogin = () => {
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
-    (import.meta.env.PROD ? '/api' : 'http://localhost:31294/api');
-  window.location.href = `${API_BASE_URL.replace('/api', '')}/oauth2/authorization/azure`;
+  // In production, OAuth endpoint is on the backend domain (api.openflow.world)
+  // In development, it's on localhost
+  const isProduction = import.meta.env.PROD;
+  
+  if (isProduction) {
+    // Derive backend URL from current hostname: app.openflow.world -> api.openflow.world
+    const backendHost = window.location.hostname.replace('app.', 'api.');
+    window.location.href = `https://${backendHost}/oauth2/authorization/azure`;
+  } else {
+    // Development - backend on localhost
+    window.location.href = 'http://localhost:31294/oauth2/authorization/azure';
+  }
 };
 
 export default api;
