@@ -40,6 +40,9 @@ function Board() {
   // Board settings state
   const [showBoardSettings, setShowBoardSettings] = useState(false);
   
+  // Edit layout mode - when true, columns are draggable; when false, tasks are draggable
+  const [editLayoutMode, setEditLayoutMode] = useState(false);
+  
   const menuRef = useRef(null);
   
   const username = getUsername();
@@ -381,6 +384,18 @@ function Board() {
             {isAdmin() && (
               <>
                 <button
+                  onClick={() => setEditLayoutMode(!editLayoutMode)}
+                  className={`px-4 py-2.5 sm:py-2 rounded-md transition-colors shadow-sm font-medium touch-target text-sm sm:text-base ${
+                    editLayoutMode 
+                      ? 'bg-[#82AAFF] text-white hover:bg-[#6B8FE8]' 
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
+                  aria-label={editLayoutMode ? 'Exit layout edit mode' : 'Enter layout edit mode'}
+                  title={editLayoutMode ? 'Click to exit layout editing' : 'Click to reorder columns'}
+                >
+                  {editLayoutMode ? '✓ Done' : '↔ Reorder'}
+                </button>
+                <button
                   onClick={() => setShowBoardSettings(true)}
                   className="bg-gray-200 hover:bg-gray-300 px-3 py-2.5 sm:py-2 rounded-md transition-colors shadow-sm text-gray-700 font-medium touch-target text-sm sm:text-base"
                   aria-label="Board settings"
@@ -523,29 +538,31 @@ function Board() {
                     ? 'bg-[#88D8C0]/30 border-dashed border-[#82AAFF] border-2'
                     : dragOverColumnId === status.id
                     ? 'bg-[#B19CD9]/20 border-dashed border-[#B19CD9] border-2'
+                    : editLayoutMode && isAdmin()
+                    ? 'border-dashed border-[#82AAFF]/50'
                     : 'border-[#B19CD9]/30'
                 } ${draggedColumnId === status.id ? 'opacity-50' : ''}`}
-                draggable={isAdmin()}
-                onDragStart={(e) => isAdmin() && handleColumnDragStart(e, status.id)}
+                draggable={isAdmin() && editLayoutMode}
+                onDragStart={(e) => isAdmin() && editLayoutMode && handleColumnDragStart(e, status.id)}
                 onDragEnd={handleColumnDragEnd}
                 onDragOver={(e) => {
-                  if (draggedColumnId) {
+                  if (editLayoutMode && draggedColumnId) {
                     handleColumnDragOver(e, status.id);
-                  } else {
+                  } else if (!editLayoutMode) {
                     handleDragOver(e, status.id);
                   }
                 }}
                 onDragLeave={() => {
-                  if (draggedColumnId) {
+                  if (editLayoutMode && draggedColumnId) {
                     handleColumnDragLeave();
-                  } else {
+                  } else if (!editLayoutMode) {
                     handleDragLeave();
                   }
                 }}
                 onDrop={(e) => {
-                  if (draggedColumnId) {
+                  if (editLayoutMode && draggedColumnId) {
                     handleColumnDrop(e, status.id);
-                  } else {
+                  } else if (!editLayoutMode) {
                     handleDrop(e, status.id);
                   }
                 }}
@@ -553,7 +570,7 @@ function Board() {
                 aria-label={`Status column: ${status.name}`}
               >
                 <div
-                  className={`flex justify-between items-center p-3 bg-white rounded mb-3 border-t-4 shadow-sm ${isAdmin() ? 'cursor-grab active:cursor-grabbing' : ''}`}
+                  className={`flex justify-between items-center p-3 bg-white rounded mb-3 border-t-4 shadow-sm ${isAdmin() && editLayoutMode ? 'cursor-grab active:cursor-grabbing' : ''}`}
                   style={{ borderTopColor: status.color || '#82AAFF' }}
                 >
                   <h3 className="font-semibold text-gray-700 text-sm sm:text-base flex-1">{status.name}</h3>
@@ -587,8 +604,8 @@ function Board() {
                       boardId={parseInt(id)}
                       onDelete={handleDeleteTask}
                       onUpdate={handleUpdateTask}
-                      onDragStart={handleDragStart}
-                      onDragEnd={handleDragEnd}
+                      onDragStart={editLayoutMode ? null : handleDragStart}
+                      onDragEnd={editLayoutMode ? null : handleDragEnd}
                     />
                   ))}
                 </div>

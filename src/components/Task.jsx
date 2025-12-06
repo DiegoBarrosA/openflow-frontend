@@ -21,13 +21,17 @@ function Task({ task, boardId, onDelete, onUpdate, onDragStart, onDragEnd }) {
     }
   };
 
+  const isDraggable = onDragStart && !showDetailModal;
+
   const handleDragStart = (e) => {
+    if (!onDragStart) {
+      e.preventDefault();
+      return;
+    }
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', task.id.toString());
     e.currentTarget.style.opacity = '0.5';
-    if (onDragStart) {
-      onDragStart(task.id);
-    }
+    onDragStart(task.id);
   };
 
   const handleDragEnd = (e) => {
@@ -40,8 +44,10 @@ function Task({ task, boardId, onDelete, onUpdate, onDragStart, onDragEnd }) {
   return (
     <>
       <article
-        className="bg-white rounded-md p-3 sm:p-3 shadow-sm mb-2 relative cursor-grab active:cursor-grabbing hover:shadow-md transition-all select-none hover:-translate-y-0.5 group border-l-4 border-[#88D8C0] hover:border-[#82AAFF]"
-        draggable={!showDetailModal}
+        className={`bg-white rounded-md p-3 sm:p-3 shadow-sm mb-2 relative hover:shadow-md transition-all select-none hover:-translate-y-0.5 group border-l-4 border-[#88D8C0] hover:border-[#82AAFF] ${
+          isDraggable ? 'cursor-grab active:cursor-grabbing' : 'cursor-default'
+        }`}
+        draggable={isDraggable}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
         role="article"
