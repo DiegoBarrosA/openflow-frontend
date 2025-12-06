@@ -11,6 +11,7 @@ import PublicBoard from './components/PublicBoard';
 
 /**
  * Private route wrapper - requires authentication.
+ * Redirects unauthenticated users to public boards.
  */
 const PrivateRoute = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -23,11 +24,12 @@ const PrivateRoute = ({ children }) => {
     );
   }
   
-  return isAuthenticated() ? children : <Navigate to="/login" />;
+  return isAuthenticated() ? children : <Navigate to="/public/boards" />;
 };
 
 /**
  * Admin-only route wrapper.
+ * Redirects unauthenticated users to public boards.
  */
 const AdminRoute = ({ children }) => {
   const { isAuthenticated, isAdmin, isLoading } = useAuth();
@@ -41,7 +43,7 @@ const AdminRoute = ({ children }) => {
   }
   
   if (!isAuthenticated()) {
-    return <Navigate to="/login" />;
+    return <Navigate to="/public/boards" />;
   }
   
   if (!isAdmin()) {
@@ -81,8 +83,8 @@ function AppRoutes() {
         }
       />
       
-      {/* Default redirect */}
-      <Route path="/" element={<Navigate to="/boards" />} />
+      {/* Default redirect - go to public boards */}
+      <Route path="/" element={<Navigate to="/public/boards" />} />
     </Routes>
   );
 }
