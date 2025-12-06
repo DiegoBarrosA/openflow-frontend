@@ -14,6 +14,7 @@ function TaskDetailModal({ task, boardId, onClose, onUpdate, onDelete }) {
   const [assignedUserId, setAssignedUserId] = useState(task.assignedUserId || null);
   const [users, setUsers] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   useEffect(() => {
     // Update local state when task changes
@@ -43,6 +44,11 @@ function TaskDetailModal({ task, boardId, onClose, onUpdate, onDelete }) {
         assignedUserId: assignedUserId,
       });
       setIsEditing(false);
+      setSaveSuccess(true);
+      // Auto-close after brief success feedback
+      setTimeout(() => {
+        onClose();
+      }, 800);
     } catch (err) {
       console.error('Error saving task:', err);
     } finally {
@@ -84,9 +90,20 @@ function TaskDetailModal({ task, boardId, onClose, onUpdate, onDelete }) {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 bg-gradient-to-r from-[#82AAFF]/10 to-[#B19CD9]/10">
+        <div className={`flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 transition-all duration-300 ${
+          saveSuccess 
+            ? 'bg-gradient-to-r from-[#88D8C0]/30 to-[#88D8C0]/10' 
+            : 'bg-gradient-to-r from-[#82AAFF]/10 to-[#B19CD9]/10'
+        }`}>
           <div className="flex items-center gap-3 flex-1 min-w-0">
-            {isEditing ? (
+            {saveSuccess ? (
+              <div className="flex items-center gap-2 text-[#2E8B57]">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span className="text-lg font-semibold">Saved successfully!</span>
+              </div>
+            ) : isEditing ? (
               <input
                 type="text"
                 value={title}

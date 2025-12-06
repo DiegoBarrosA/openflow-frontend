@@ -1,9 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   getCustomFieldDefinitions,
   getTaskCustomFieldValues,
   setTaskCustomFieldValue
 } from '../services/api';
+
+// Simple in-memory cache for field definitions (keyed by boardId)
+// Cache entries expire after 5 minutes
+const definitionsCache = new Map();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+const getCachedDefinitions = (boardId) => {
+  const cached = definitionsCache.get(boardId);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return cached.data;
+  }
+  return null;
+};
+
+const setCachedDefinitions = (boardId, data) => {
+  definitionsCache.set(boardId, { data, timestamp: Date.now() });
+};
 
 /**
  * CustomFields component - displays and allows editing of custom field values for a task.
@@ -17,16 +34,25 @@ import {
  * - initialValues: Initial values for create mode
  */
 const CustomFields = ({ taskId, boardId, readOnly = false, mode = 'edit', onChange, initialValues = {} }) => {
-  const [definitions, setDefinitions] = useState([]);
+  const [definitions, setDefinitions] = useState(() => getCachedDefinitions(boardId) || []);
   const [values, setValues] = useState(initialValues);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!getCachedDefinitions(boardId));
+  const [loadingValues, setLoadingValues] = useState(false);
   const [savingField, setSavingField] = useState(null);
   const [errors, setErrors] = useState({});
+  const fetchedRef = useRef(false);
 
   const isCreateMode = mode === 'create';
 
   useEffect(() => {
+    // Prevent double fetching in strict mode
+    if (fetchedRef.current) return;
+    fetchedRef.current = true;
     fetchData();
+    
+    return () => {
+      fetchedRef.current = false;
+    };
   }, [taskId, boardId]);
 
   useEffect(() => {
@@ -37,18 +63,54 @@ const CustomFields = ({ taskId, boardId, readOnly = false, mode = 'edit', onChan
 
   const fetchData = async () => {
     try {
+      const cachedDefs = getCachedDefinitions(boardId);
+      
+      // If we have cached definitions, show them immediately
+      if (cachedDefs) {
+        setDefinitions(cachedDefs);
+        setLoading(false);
+        
+        // Fetch values in parallel if needed (edit mode)
+        if (taskId && !isCreateMode) {
+          setLoadingValues(true);
+          try {
+            const vals = await getTaskCustomFieldValues(taskId);
+            const valuesMap = {};
+            vals.forEach(v => {
+              valuesMap[v.fieldDefinitionId] = v.value;
+            });
+            setValues(valuesMap);
+          } finally {
+            setLoadingValues(false);
+          }
+        }
+        
+        // Refresh definitions in background (don't await)
+        getCustomFieldDefinitions(boardId).then(defs => {
+          setCachedDefinitions(boardId, defs);
+          setDefinitions(defs);
+        }).catch(console.error);
+        
+        return;
+      }
+      
+      // No cache - fetch everything in parallel
       setLoading(true);
       
-      // Always fetch definitions
-      const defs = await getCustomFieldDefinitions(boardId);
+      const promises = [getCustomFieldDefinitions(boardId)];
+      if (taskId && !isCreateMode) {
+        promises.push(getTaskCustomFieldValues(taskId));
+      }
+      
+      const results = await Promise.all(promises);
+      
+      const defs = results[0];
+      setCachedDefinitions(boardId, defs);
       setDefinitions(defs);
       
-      // Only fetch values if we have a taskId (edit mode)
-      if (taskId && !isCreateMode) {
-        const vals = await getTaskCustomFieldValues(taskId);
-        // Convert values array to a map for easy lookup
+      if (results[1]) {
         const valuesMap = {};
-        vals.forEach(v => {
+        results[1].forEach(v => {
           valuesMap[v.fieldDefinitionId] = v.value;
         });
         setValues(valuesMap);
@@ -57,6 +119,7 @@ const CustomFields = ({ taskId, boardId, readOnly = false, mode = 'edit', onChan
       console.error('Failed to load custom fields:', err);
     } finally {
       setLoading(false);
+      setLoadingValues(false);
     }
   };
 
@@ -249,12 +312,18 @@ const CustomFields = ({ taskId, boardId, readOnly = false, mode = 'edit', onChan
   if (loading) {
     return (
       <div className="mt-4 pt-4 border-t border-[#B19CD9]/20">
-        <div className="flex items-center gap-2 text-sm text-gray-500">
-          <svg className="animate-spin h-4 w-4 text-[#82AAFF]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-          <span>Loading custom fields...</span>
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-1 h-4 bg-[#B19CD9] rounded-full"></div>
+          <h4 className="text-sm font-semibold text-gray-700">Custom Fields</h4>
+        </div>
+        {/* Skeleton loading */}
+        <div className="space-y-3 animate-pulse">
+          {[1, 2].map((i) => (
+            <div key={i}>
+              <div className="h-4 w-20 bg-gray-200 rounded mb-1.5"></div>
+              <div className="h-10 w-full bg-gray-100 rounded-md border border-gray-200"></div>
+            </div>
+          ))}
         </div>
       </div>
     );
@@ -269,8 +338,14 @@ const CustomFields = ({ taskId, boardId, readOnly = false, mode = 'edit', onChan
       <div className="flex items-center gap-2 mb-3">
         <div className="w-1 h-4 bg-[#B19CD9] rounded-full"></div>
         <h4 className="text-sm font-semibold text-gray-700">Custom Fields</h4>
+        {loadingValues && (
+          <svg className="animate-spin h-3 w-3 text-[#82AAFF] ml-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+        )}
       </div>
-      <div className="space-y-3">
+      <div className={`space-y-3 ${loadingValues ? 'opacity-60' : ''}`}>
         {definitions.map((definition) => (
           <div key={definition.id} className={`${definition.fieldType === 'CHECKBOX' ? 'flex items-center gap-3' : ''}`}>
             <label className={`text-sm font-medium text-gray-600 ${definition.fieldType === 'CHECKBOX' ? 'order-2' : 'block mb-1.5'}`}>
