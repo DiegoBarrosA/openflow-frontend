@@ -129,9 +129,13 @@ const CustomFields = ({ taskId, boardId, readOnly = false, mode = 'edit', onChan
     const isSaving = savingField === definition.id;
     const error = errors[definition.id];
     const hasError = !!error;
-    const baseInputClass = `w-full px-2 py-1 text-sm border rounded focus:outline-none focus:ring-1 disabled:bg-gray-100 ${
-      hasError ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
-    }`;
+    const baseInputClass = `w-full px-3 py-2 text-sm border rounded-md transition-all duration-200 
+      focus:outline-none focus:ring-2 focus:ring-offset-0 
+      disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed
+      ${hasError 
+        ? 'border-red-400 focus:ring-red-300 focus:border-red-400 bg-red-50/30' 
+        : 'border-[#B19CD9]/30 focus:ring-[#82AAFF]/30 focus:border-[#82AAFF] bg-white hover:border-[#B19CD9]/50'
+      }`;
 
     switch (definition.fieldType) {
       case 'TEXT':
@@ -142,6 +146,7 @@ const CustomFields = ({ taskId, boardId, readOnly = false, mode = 'edit', onChan
             onChange={(e) => handleValueChange(definition.id, e.target.value, definition)}
             disabled={readOnly || isSaving}
             className={baseInputClass}
+            placeholder={`Enter ${definition.name.toLowerCase()}`}
           />
         );
 
@@ -151,8 +156,9 @@ const CustomFields = ({ taskId, boardId, readOnly = false, mode = 'edit', onChan
             value={value}
             onChange={(e) => handleValueChange(definition.id, e.target.value, definition)}
             disabled={readOnly || isSaving}
-            rows={2}
-            className={`${baseInputClass} resize-y`}
+            rows={3}
+            className={`${baseInputClass} resize-y min-h-[60px]`}
+            placeholder={`Enter ${definition.name.toLowerCase()}`}
           />
         );
 
@@ -165,7 +171,7 @@ const CustomFields = ({ taskId, boardId, readOnly = false, mode = 'edit', onChan
             onChange={(e) => handleValueChange(definition.id, e.target.value, definition)}
             disabled={readOnly || isSaving}
             className={baseInputClass}
-            placeholder="Enter a number"
+            placeholder="0"
           />
         );
 
@@ -176,7 +182,7 @@ const CustomFields = ({ taskId, boardId, readOnly = false, mode = 'edit', onChan
             value={value}
             onChange={(e) => handleValueChange(definition.id, e.target.value, definition)}
             disabled={readOnly || isSaving}
-            className={baseInputClass}
+            className={`${baseInputClass} cursor-pointer`}
           />
         );
 
@@ -186,9 +192,14 @@ const CustomFields = ({ taskId, boardId, readOnly = false, mode = 'edit', onChan
             value={value}
             onChange={(e) => handleValueChange(definition.id, e.target.value, definition)}
             disabled={readOnly || isSaving}
-            className={baseInputClass}
+            className={`${baseInputClass} cursor-pointer appearance-none bg-no-repeat bg-right pr-8`}
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239ca3af'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
+              backgroundSize: '1.25rem',
+              backgroundPosition: 'right 0.5rem center'
+            }}
           >
-            <option value="">-- Select --</option>
+            <option value="">Select an option...</option>
             {(definition.options || []).map((opt, idx) => (
               <option key={idx} value={opt}>
                 {opt}
@@ -198,14 +209,28 @@ const CustomFields = ({ taskId, boardId, readOnly = false, mode = 'edit', onChan
         );
 
       case 'CHECKBOX':
+        const isChecked = value === 'true';
         return (
-          <input
-            type="checkbox"
-            checked={value === 'true'}
-            onChange={(e) => handleValueChange(definition.id, e.target.checked ? 'true' : 'false', definition)}
+          <button
+            type="button"
+            role="checkbox"
+            aria-checked={isChecked}
+            onClick={() => !readOnly && !isSaving && handleValueChange(definition.id, isChecked ? 'false' : 'true', definition)}
             disabled={readOnly || isSaving}
-            className="rounded border-gray-300"
-          />
+            className={`w-6 h-6 rounded-md border-2 transition-all duration-200 flex items-center justify-center
+              ${isChecked 
+                ? 'bg-[#88D8C0] border-[#88D8C0] text-white' 
+                : 'bg-white border-[#B19CD9]/40 hover:border-[#B19CD9]'
+              }
+              ${readOnly || isSaving ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+              focus:outline-none focus:ring-2 focus:ring-[#82AAFF]/30 focus:ring-offset-1`}
+          >
+            {isChecked && (
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+              </svg>
+            )}
+          </button>
         );
 
       default:
@@ -222,7 +247,17 @@ const CustomFields = ({ taskId, boardId, readOnly = false, mode = 'edit', onChan
   };
 
   if (loading) {
-    return <div className="text-xs text-gray-400 mt-2">Loading fields...</div>;
+    return (
+      <div className="mt-4 pt-4 border-t border-[#B19CD9]/20">
+        <div className="flex items-center gap-2 text-sm text-gray-500">
+          <svg className="animate-spin h-4 w-4 text-[#82AAFF]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span>Loading custom fields...</span>
+        </div>
+      </div>
+    );
   }
 
   if (definitions.length === 0) {
@@ -230,22 +265,36 @@ const CustomFields = ({ taskId, boardId, readOnly = false, mode = 'edit', onChan
   }
 
   return (
-    <div className="mt-3 pt-3 border-t border-gray-200">
-      <div className="text-xs font-medium text-gray-500 mb-2">Custom Fields</div>
-      <div className="space-y-2">
+    <div className="mt-4 pt-4 border-t border-[#B19CD9]/20">
+      <div className="flex items-center gap-2 mb-3">
+        <div className="w-1 h-4 bg-[#B19CD9] rounded-full"></div>
+        <h4 className="text-sm font-semibold text-gray-700">Custom Fields</h4>
+      </div>
+      <div className="space-y-3">
         {definitions.map((definition) => (
-          <div key={definition.id} className="flex items-start gap-2">
-            <label className="text-xs text-gray-600 w-24 pt-1 flex-shrink-0">
+          <div key={definition.id} className={`${definition.fieldType === 'CHECKBOX' ? 'flex items-center gap-3' : ''}`}>
+            <label className={`text-sm font-medium text-gray-600 ${definition.fieldType === 'CHECKBOX' ? 'order-2' : 'block mb-1.5'}`}>
               {definition.name}
-              {definition.isRequired && <span className="text-red-500 ml-0.5">*</span>}
+              {definition.isRequired && <span className="text-red-400 ml-0.5">*</span>}
             </label>
-            <div className="flex-1">
+            <div className={definition.fieldType === 'CHECKBOX' ? 'order-1' : ''}>
               {renderFieldInput(definition)}
               {errors[definition.id] && (
-                <span className="text-xs text-red-500 mt-0.5 block">{errors[definition.id]}</span>
+                <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
+                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  {errors[definition.id]}
+                </p>
               )}
               {savingField === definition.id && (
-                <span className="text-xs text-gray-400 ml-1">Saving...</span>
+                <p className="text-xs text-[#82AAFF] mt-1 flex items-center gap-1">
+                  <svg className="animate-spin h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Saving...
+                </p>
               )}
             </div>
           </div>
