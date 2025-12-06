@@ -2,6 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import Task from './Task';
+import CustomFieldManager from './CustomFieldManager';
+import NotificationBell from './NotificationBell';
+import SubscribeButton from './SubscribeButton';
 import { useAuth, ROLES } from '../contexts/AuthContext';
 
 function Board() {
@@ -21,6 +24,7 @@ function Board() {
   const [draggedTaskId, setDraggedTaskId] = useState(null);
   const [dragOverStatusId, setDragOverStatusId] = useState(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showCustomFieldManager, setShowCustomFieldManager] = useState(false);
   const menuRef = useRef(null);
   
   const username = getUsername();
@@ -225,17 +229,33 @@ function Board() {
             <h1 className="text-xl sm:text-2xl md:text-3xl font-bold truncate flex-1 text-[#82AAFF]">{board.name}</h1>
           </div>
           <div className="flex items-center gap-3 sm:gap-4">
-            {/* Only show Add Status button for Admins */}
+            {/* Subscribe to board notifications */}
+            <SubscribeButton entityType="BOARD" entityId={parseInt(id)} size="sm" />
+            
+            {/* Only show Add Status and Custom Fields buttons for Admins */}
             {isAdmin() && (
-              <button
-                onClick={() => setShowStatusForm(!showStatusForm)}
-                className="bg-[#88D8C0] hover:bg-[#6FC4A8] px-5 sm:px-6 py-2.5 sm:py-2 rounded-md transition-colors shadow-sm text-gray-800 font-medium touch-target w-full sm:w-auto text-sm sm:text-base"
-                aria-label={showStatusForm ? 'Cancel status creation' : 'Add new status'}
-                aria-expanded={showStatusForm}
-              >
-                {showStatusForm ? 'Cancel' : 'Add Status'}
-              </button>
+              <>
+                <button
+                  onClick={() => setShowCustomFieldManager(true)}
+                  className="bg-[#B19CD9] hover:bg-[#9B86C9] px-4 sm:px-5 py-2.5 sm:py-2 rounded-md transition-colors shadow-sm text-white font-medium touch-target text-sm sm:text-base"
+                  aria-label="Manage custom fields"
+                >
+                  ⚙ Fields
+                </button>
+                <button
+                  onClick={() => setShowStatusForm(!showStatusForm)}
+                  className="bg-[#88D8C0] hover:bg-[#6FC4A8] px-5 sm:px-6 py-2.5 sm:py-2 rounded-md transition-colors shadow-sm text-gray-800 font-medium touch-target w-full sm:w-auto text-sm sm:text-base"
+                  aria-label={showStatusForm ? 'Cancel status creation' : 'Add new status'}
+                  aria-expanded={showStatusForm}
+                >
+                  {showStatusForm ? 'Cancel' : 'Add Status'}
+                </button>
+              </>
             )}
+            
+            {/* Notifications */}
+            <NotificationBell />
+            
             <div className="relative" ref={menuRef}>
               <button
                 onClick={() => setShowUserMenu(!showUserMenu)}
@@ -378,6 +398,7 @@ function Board() {
                     <Task
                       key={task.id}
                       task={task}
+                      boardId={parseInt(id)}
                       onDelete={handleDeleteTask}
                       onUpdate={handleUpdateTask}
                       onDragStart={handleDragStart}
@@ -464,6 +485,14 @@ function Board() {
             </form>
           </div>
         </div>
+      )}
+
+      {/* Custom Field Manager Modal */}
+      {showCustomFieldManager && (
+        <CustomFieldManager
+          boardId={parseInt(id)}
+          onClose={() => setShowCustomFieldManager(false)}
+        />
       )}
     </div>
   );

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth, ROLES } from '../contexts/AuthContext';
+import NotificationBell from './NotificationBell';
 
 function BoardList() {
   const [boards, setBoards] = useState([]);
@@ -94,6 +95,10 @@ function BoardList() {
             >
               Public Boards
             </Link>
+            
+            {/* Notifications */}
+            <NotificationBell />
+            
             <div className="relative" ref={menuRef}>
               <button
                 onClick={() => setShowUserMenu(!showUserMenu)}

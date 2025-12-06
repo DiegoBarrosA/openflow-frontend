@@ -107,6 +107,159 @@ export const getPublicBoardTasks = async (boardId) => {
   return response.data;
 };
 
+// ==================== Notifications ====================
+
+/**
+ * Get all notifications for the current user.
+ */
+export const getNotifications = async () => {
+  const response = await api.get('/notifications');
+  return response.data;
+};
+
+/**
+ * Get unread notifications count.
+ */
+export const getUnreadNotificationCount = async () => {
+  const response = await api.get('/notifications/unread/count');
+  return response.data.count;
+};
+
+/**
+ * Mark a notification as read.
+ * @param {number} id - Notification ID
+ */
+export const markNotificationAsRead = async (id) => {
+  await api.put(`/notifications/${id}/read`);
+};
+
+/**
+ * Mark all notifications as read.
+ */
+export const markAllNotificationsAsRead = async () => {
+  await api.put('/notifications/read-all');
+};
+
+// ==================== Subscriptions ====================
+
+/**
+ * Check if user is subscribed to an entity.
+ * @param {string} entityType - TASK or BOARD
+ * @param {number} entityId - Entity ID
+ */
+export const checkSubscription = async (entityType, entityId) => {
+  const response = await api.get(`/subscriptions/${entityType}/${entityId}`);
+  return response.data;
+};
+
+/**
+ * Subscribe to an entity.
+ * @param {string} entityType - TASK or BOARD
+ * @param {number} entityId - Entity ID
+ * @param {object} options - { emailEnabled: boolean, inAppEnabled: boolean }
+ */
+export const subscribe = async (entityType, entityId, options = {}) => {
+  const response = await api.post(`/subscriptions/${entityType}/${entityId}`, options);
+  return response.data;
+};
+
+/**
+ * Unsubscribe from an entity.
+ * @param {string} entityType - TASK or BOARD
+ * @param {number} entityId - Entity ID
+ */
+export const unsubscribe = async (entityType, entityId) => {
+  await api.delete(`/subscriptions/${entityType}/${entityId}`);
+};
+
+// ==================== Custom Fields ====================
+
+/**
+ * Get custom field definitions for a board.
+ * @param {number} boardId - Board ID
+ */
+export const getCustomFieldDefinitions = async (boardId) => {
+  const response = await api.get(`/custom-fields/definitions/board/${boardId}`);
+  return response.data;
+};
+
+/**
+ * Create a custom field definition.
+ * @param {object} definition - Field definition data
+ */
+export const createCustomFieldDefinition = async (definition) => {
+  const response = await api.post('/custom-fields/definitions', definition);
+  return response.data;
+};
+
+/**
+ * Update a custom field definition.
+ * @param {number} id - Definition ID
+ * @param {object} definition - Updated field definition data
+ */
+export const updateCustomFieldDefinition = async (id, definition) => {
+  const response = await api.put(`/custom-fields/definitions/${id}`, definition);
+  return response.data;
+};
+
+/**
+ * Delete a custom field definition.
+ * @param {number} id - Definition ID
+ */
+export const deleteCustomFieldDefinition = async (id) => {
+  await api.delete(`/custom-fields/definitions/${id}`);
+};
+
+/**
+ * Get custom field values for a task.
+ * @param {number} taskId - Task ID
+ */
+export const getTaskCustomFieldValues = async (taskId) => {
+  const response = await api.get(`/custom-fields/values/task/${taskId}`);
+  return response.data;
+};
+
+/**
+ * Set a custom field value for a task.
+ * @param {number} taskId - Task ID
+ * @param {number} fieldDefinitionId - Field definition ID
+ * @param {string} value - Field value
+ */
+export const setTaskCustomFieldValue = async (taskId, fieldDefinitionId, value) => {
+  const response = await api.put(`/custom-fields/values/task/${taskId}/field/${fieldDefinitionId}`, { value });
+  return response.data;
+};
+
+/**
+ * Set multiple custom field values for a task.
+ * @param {number} taskId - Task ID
+ * @param {object} fieldValues - Map of fieldDefinitionId -> value
+ */
+export const setTaskCustomFieldValues = async (taskId, fieldValues) => {
+  const response = await api.put(`/custom-fields/values/task/${taskId}`, fieldValues);
+  return response.data;
+};
+
+// ==================== Change History ====================
+
+/**
+ * Get change history for a task.
+ * @param {number} taskId - Task ID
+ */
+export const getTaskHistory = async (taskId) => {
+  const response = await api.get(`/history/tasks/${taskId}`);
+  return response.data;
+};
+
+/**
+ * Get change history for a board.
+ * @param {number} boardId - Board ID
+ */
+export const getBoardHistory = async (boardId) => {
+  const response = await api.get(`/history/boards/${boardId}`);
+  return response.data;
+};
+
 // ==================== Role utilities ====================
 
 /**

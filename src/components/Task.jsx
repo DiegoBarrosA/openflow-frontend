@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import ChangeHistory from './ChangeHistory';
+import CustomFields from './CustomFields';
 
-function Task({ task, onDelete, onUpdate, onDragStart, onDragEnd }) {
+function Task({ task, boardId, onDelete, onUpdate, onDragStart, onDragEnd }) {
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(task.title);
   const [description, setDescription] = useState(task.description || '');
@@ -62,7 +64,11 @@ function Task({ task, onDelete, onUpdate, onDragStart, onDragEnd }) {
             aria-label="Task description"
           />
         </div>
-        <div className="flex gap-2 justify-end">
+        
+        {/* Custom Fields */}
+        {boardId && <CustomFields taskId={task.id} boardId={boardId} />}
+        
+        <div className="flex gap-2 justify-end mt-3">
           <button
             onClick={handleSave}
             className="bg-[#82AAFF] text-white px-3 py-2 sm:py-1.5 rounded text-xs sm:text-sm hover:bg-[#6B8FE8] transition-colors shadow-sm touch-target font-medium"
@@ -78,6 +84,9 @@ function Task({ task, onDelete, onUpdate, onDragStart, onDragEnd }) {
             Cancel
           </button>
         </div>
+        
+        {/* Task History */}
+        <ChangeHistory entityType="task" entityId={task.id} />
       </article>
     );
   }
