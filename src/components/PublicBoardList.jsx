@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { getPublicBoards } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 
 /**
  * Public board list - viewable without authentication.
@@ -11,6 +12,8 @@ function PublicBoardList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const { isAuthenticated, getUsername } = useAuth();
+  const username = getUsername();
 
   useEffect(() => {
     fetchPublicBoards();
@@ -35,19 +38,40 @@ function PublicBoardList() {
       <header className="bg-[#F5F5F5] text-gray-700 container-responsive py-4 sm:py-5">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
           <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#82AAFF]">OpenFlow</h1>
-          <div className="flex gap-3">
-            <Link
-              to="/login"
-              className="bg-[#82AAFF] text-white px-4 py-2 rounded-md hover:bg-[#6B8FE8] transition-colors text-sm font-medium"
-            >
-              Sign In
-            </Link>
-            <Link
-              to="/register"
-              className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors text-sm font-medium"
-            >
-              Register
-            </Link>
+          <div className="flex gap-3 items-center">
+            {isAuthenticated() ? (
+              <>
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-[#88D8C0] flex items-center justify-center text-gray-800 font-semibold text-sm">
+                    {username?.charAt(0).toUpperCase() || 'U'}
+                  </div>
+                  <span className="text-gray-700 text-sm font-medium hidden sm:block">
+                    {username}
+                  </span>
+                </div>
+                <Link
+                  to="/boards"
+                  className="bg-[#82AAFF] text-white px-4 py-2 rounded-md hover:bg-[#6B8FE8] transition-colors text-sm font-medium"
+                >
+                  My Boards
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  className="bg-[#82AAFF] text-white px-4 py-2 rounded-md hover:bg-[#6B8FE8] transition-colors text-sm font-medium"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  to="/register"
+                  className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors text-sm font-medium"
+                >
+                  Register
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </header>

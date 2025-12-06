@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getPublicBoard, getPublicBoardStatuses, getPublicBoardTasks } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 
 /**
  * Public board view - read-only, no authentication required.
@@ -8,6 +9,8 @@ import { getPublicBoard, getPublicBoardStatuses, getPublicBoardTasks } from '../
 function PublicBoard() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { isAuthenticated, getUsername } = useAuth();
+  const username = getUsername();
   const [board, setBoard] = useState(null);
   const [statuses, setStatuses] = useState([]);
   const [tasks, setTasks] = useState([]);
@@ -103,13 +106,32 @@ function PublicBoard() {
               Public (Read-only)
             </span>
           </div>
-          <div className="flex gap-3">
-            <Link
-              to="/login"
-              className="bg-[#82AAFF] text-white px-4 py-2 rounded-md hover:bg-[#6B8FE8] transition-colors text-sm font-medium"
-            >
-              Sign In to Edit
-            </Link>
+          <div className="flex gap-3 items-center">
+            {isAuthenticated() ? (
+              <>
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-[#88D8C0] flex items-center justify-center text-gray-800 font-semibold text-sm">
+                    {username?.charAt(0).toUpperCase() || 'U'}
+                  </div>
+                  <span className="text-gray-700 text-sm font-medium hidden sm:block">
+                    {username}
+                  </span>
+                </div>
+                <Link
+                  to="/boards"
+                  className="bg-[#82AAFF] text-white px-4 py-2 rounded-md hover:bg-[#6B8FE8] transition-colors text-sm font-medium"
+                >
+                  My Boards
+                </Link>
+              </>
+            ) : (
+              <Link
+                to="/login"
+                className="bg-[#82AAFF] text-white px-4 py-2 rounded-md hover:bg-[#6B8FE8] transition-colors text-sm font-medium"
+              >
+                Sign In to Edit
+              </Link>
+            )}
           </div>
         </div>
         {board?.description && (
