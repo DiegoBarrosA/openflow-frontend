@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 
 function OAuthCallback() {
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   useEffect(() => {
     const handleCallback = async () => {
@@ -13,10 +15,11 @@ function OAuthCallback() {
         const urlParams = new URLSearchParams(window.location.search);
         const token = urlParams.get('token');
         const username = urlParams.get('username');
+        const role = urlParams.get('role');
 
         if (token && username) {
-          localStorage.setItem('token', token);
-          localStorage.setItem('username', username);
+          // Use AuthContext login which handles role extraction
+          login(token, username, role);
           navigate('/boards');
           return;
         }
@@ -29,8 +32,7 @@ function OAuthCallback() {
             // Try to get token from Azure AD success endpoint
             const authResponse = await api.get('/auth/azure/success');
             if (authResponse.data && authResponse.data.token) {
-              localStorage.setItem('token', authResponse.data.token);
-              localStorage.setItem('username', authResponse.data.username);
+              login(authResponse.data.token, authResponse.data.username, authResponse.data.role);
               navigate('/boards');
             } else {
               setError('Authentication successful but token not received');
@@ -43,8 +45,7 @@ function OAuthCallback() {
           try {
             const authResponse = await api.get('/auth/azure/success');
             if (authResponse.data && authResponse.data.token) {
-              localStorage.setItem('token', authResponse.data.token);
-              localStorage.setItem('username', authResponse.data.username);
+              login(authResponse.data.token, authResponse.data.username, authResponse.data.role);
               navigate('/boards');
             } else {
               setError('Authentication failed');
@@ -61,7 +62,7 @@ function OAuthCallback() {
     };
 
     handleCallback();
-  }, [navigate]);
+  }, [navigate, login]);
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#82AAFF] via-[#88D8C0] to-[#B19CD9] container-responsive py-8">

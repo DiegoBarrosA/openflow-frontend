@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 
 function Register() {
   const [username, setUsername] = useState('');
@@ -8,6 +9,7 @@ function Register() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,8 +21,8 @@ function Register() {
         email,
         password,
       });
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('username', response.data.username);
+      // Use AuthContext login which handles role
+      login(response.data.token, response.data.username, response.data.role);
       navigate('/boards');
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed');

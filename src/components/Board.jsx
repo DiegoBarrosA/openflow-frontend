@@ -2,10 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import Task from './Task';
+import { useAuth, ROLES } from '../contexts/AuthContext';
 
 function Board() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { isAdmin, getUsername, getRole, logout } = useAuth();
   const [board, setBoard] = useState(null);
   const [statuses, setStatuses] = useState([]);
   const [tasks, setTasks] = useState([]);
@@ -20,6 +22,9 @@ function Board() {
   const [dragOverStatusId, setDragOverStatusId] = useState(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const menuRef = useRef(null);
+  
+  const username = getUsername();
+  const role = getRole();
 
   useEffect(() => {
     fetchBoard();
@@ -220,14 +225,17 @@ function Board() {
             <h1 className="text-xl sm:text-2xl md:text-3xl font-bold truncate flex-1 text-[#82AAFF]">{board.name}</h1>
           </div>
           <div className="flex items-center gap-3 sm:gap-4">
-            <button
-              onClick={() => setShowStatusForm(!showStatusForm)}
-              className="bg-[#88D8C0] hover:bg-[#6FC4A8] px-5 sm:px-6 py-2.5 sm:py-2 rounded-md transition-colors shadow-sm text-gray-800 font-medium touch-target w-full sm:w-auto text-sm sm:text-base"
-              aria-label={showStatusForm ? 'Cancel status creation' : 'Add new status'}
-              aria-expanded={showStatusForm}
-            >
-              {showStatusForm ? 'Cancel' : 'Add Status'}
-            </button>
+            {/* Only show Add Status button for Admins */}
+            {isAdmin() && (
+              <button
+                onClick={() => setShowStatusForm(!showStatusForm)}
+                className="bg-[#88D8C0] hover:bg-[#6FC4A8] px-5 sm:px-6 py-2.5 sm:py-2 rounded-md transition-colors shadow-sm text-gray-800 font-medium touch-target w-full sm:w-auto text-sm sm:text-base"
+                aria-label={showStatusForm ? 'Cancel status creation' : 'Add new status'}
+                aria-expanded={showStatusForm}
+              >
+                {showStatusForm ? 'Cancel' : 'Add Status'}
+              </button>
+            )}
             <div className="relative" ref={menuRef}>
               <button
                 onClick={() => setShowUserMenu(!showUserMenu)}
@@ -236,10 +244,10 @@ function Board() {
                 aria-expanded={showUserMenu}
               >
                 <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#88D8C0] flex items-center justify-center text-gray-800 font-semibold text-sm sm:text-base">
-                  {localStorage.getItem('username')?.charAt(0).toUpperCase() || 'U'}
+                  {username?.charAt(0).toUpperCase() || 'U'}
                 </div>
                 <span className="text-gray-700 text-sm sm:text-base font-medium hidden sm:block">
-                  {localStorage.getItem('username')}
+                  {username}
                 </span>
                 <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -250,17 +258,23 @@ function Board() {
                   <div className="px-4 py-3 border-b border-gray-100">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-[#88D8C0] flex items-center justify-center text-gray-800 font-semibold">
-                        {localStorage.getItem('username')?.charAt(0).toUpperCase() || 'U'}
+                        {username?.charAt(0).toUpperCase() || 'U'}
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-800">{localStorage.getItem('username')}</p>
+                        <p className="text-sm font-medium text-gray-800">{username}</p>
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                          role === ROLES.ADMIN 
+                            ? 'bg-purple-100 text-purple-800' 
+                            : 'bg-blue-100 text-blue-800'
+                        }`}>
+                          {role === ROLES.ADMIN ? 'Admin' : 'User'}
+                        </span>
                       </div>
                     </div>
                   </div>
                   <button
                     onClick={() => {
-                      localStorage.removeItem('token');
-                      localStorage.removeItem('username');
+                      logout();
                       navigate('/login');
                     }}
                     className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
@@ -275,7 +289,8 @@ function Board() {
         </div>
       </header>
 
-      {showStatusForm && (
+      {/* Only show status form for Admins */}
+      {isAdmin() && showStatusForm && (
         <div className="bg-white p-5 sm:p-6 mx-4 sm:mx-6 mt-4 sm:mt-6 rounded-lg shadow-sm border border-gray-200">
           <form onSubmit={handleCreateStatus} className="space-y-4" aria-label="Create status form">
             <div>
@@ -346,14 +361,17 @@ function Board() {
                   style={{ borderTopColor: status.color || '#82AAFF' }}
                 >
                   <h3 className="font-semibold text-gray-700 text-sm sm:text-base">{status.name}</h3>
-                  <button
-                    onClick={() => handleDeleteStatus(status.id)}
-                    className="text-gray-400 hover:text-red-600 text-xl sm:text-2xl leading-none w-8 h-8 sm:w-6 sm:h-6 flex items-center justify-center hover:bg-red-50 rounded transition-all touch-target"
-                    aria-label={`Delete status: ${status.name}`}
-                    title="Delete status"
-                  >
-                    ×
-                  </button>
+                  {/* Only show delete button for Admins */}
+                  {isAdmin() && (
+                    <button
+                      onClick={() => handleDeleteStatus(status.id)}
+                      className="text-gray-400 hover:text-red-600 text-xl sm:text-2xl leading-none w-8 h-8 sm:w-6 sm:h-6 flex items-center justify-center hover:bg-red-50 rounded transition-all touch-target"
+                      aria-label={`Delete status: ${status.name}`}
+                      title="Delete status"
+                    >
+                      ×
+                    </button>
+                  )}
                 </div>
                 <div className="min-h-[50px] space-y-2" role="list" aria-label={`Tasks in ${status.name}`}>
                   {getTasksByStatus(status.id).map((task) => (
