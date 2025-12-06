@@ -1,22 +1,29 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import api from '../services/api';
+import api, { getTemplates, createBoardFromTemplate } from '../services/api';
 import { useAuth, ROLES } from '../contexts/AuthContext';
 import NotificationBell from './NotificationBell';
 
 function BoardList() {
   const [boards, setBoards] = useState([]);
+  const [templates, setTemplates] = useState([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showTemplateForm, setShowTemplateForm] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [newBoardName, setNewBoardName] = useState('');
   const [newBoardDescription, setNewBoardDescription] = useState('');
   const [newBoardIsPublic, setNewBoardIsPublic] = useState(false);
+  const [selectedTemplateId, setSelectedTemplateId] = useState(null);
+  const [templateBoardName, setTemplateBoardName] = useState('');
   const navigate = useNavigate();
   const menuRef = useRef(null);
   const { isAdmin, getUsername, getRole, logout } = useAuth();
 
   useEffect(() => {
     fetchBoards();
+    if (isAdmin()) {
+      fetchTemplates();
+    }
   }, []);
 
   useEffect(() => {
@@ -41,6 +48,15 @@ function BoardList() {
       setBoards(response.data);
     } catch (err) {
       console.error('Error fetching boards:', err);
+    }
+  };
+
+  const fetchTemplates = async () => {
+    try {
+      const data = await getTemplates();
+      setTemplates(data);
+    } catch (err) {
+      console.error('Error fetching templates:', err);
     }
   };
 
@@ -72,6 +88,22 @@ function BoardList() {
       setBoards(boards.filter((board) => board.id !== id));
     } catch (err) {
       console.error('Error deleting board:', err);
+    }
+  };
+
+  const handleCreateFromTemplate = async (e) => {
+    e.preventDefault();
+    if (!selectedTemplateId || !templateBoardName.trim()) return;
+    
+    try {
+      const newBoard = await createBoardFromTemplate(selectedTemplateId, templateBoardName);
+      setBoards([...boards, newBoard]);
+      setTemplateBoardName('');
+      setSelectedTemplateId(null);
+      setShowTemplateForm(false);
+      navigate(`/boards/${newBoard.id}`);
+    } catch (err) {
+      console.error('Error creating board from template:', err);
     }
   };
 
@@ -151,16 +183,33 @@ function BoardList() {
       <main className="max-w-7xl mx-auto container-responsive py-6 sm:py-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-700">My Boards</h2>
-          {/* Only show Create Board button for Admins */}
+          {/* Only show Create Board buttons for Admins */}
           {isAdmin() && (
-            <button
-              onClick={() => setShowCreateForm(!showCreateForm)}
-              className="bg-[#82AAFF] text-white px-5 sm:px-6 py-2.5 sm:py-2 rounded-md hover:bg-[#6B8FE8] focus:outline-none focus:ring-2 focus:ring-[#82AAFF] focus:ring-offset-2 transition-colors shadow-md touch-target w-full sm:w-auto text-sm sm:text-base font-medium"
-              aria-label={showCreateForm ? 'Cancel board creation' : 'Create new board'}
-              aria-expanded={showCreateForm}
-            >
-              {showCreateForm ? 'Cancel' : 'Create Board'}
-            </button>
+            <div className="flex gap-2 w-full sm:w-auto">
+              {templates.length > 0 && (
+                <button
+                  onClick={() => {
+                    setShowTemplateForm(!showTemplateForm);
+                    setShowCreateForm(false);
+                  }}
+                  className="bg-[#B19CD9] text-white px-4 sm:px-5 py-2.5 sm:py-2 rounded-md hover:bg-[#9B86C9] focus:outline-none focus:ring-2 focus:ring-[#B19CD9] focus:ring-offset-2 transition-colors shadow-md touch-target flex-1 sm:flex-none text-sm sm:text-base font-medium"
+                  aria-label={showTemplateForm ? 'Cancel template selection' : 'Create from template'}
+                >
+                  {showTemplateForm ? 'Cancel' : 'From Template'}
+                </button>
+              )}
+              <button
+                onClick={() => {
+                  setShowCreateForm(!showCreateForm);
+                  setShowTemplateForm(false);
+                }}
+                className="bg-[#82AAFF] text-white px-5 sm:px-6 py-2.5 sm:py-2 rounded-md hover:bg-[#6B8FE8] focus:outline-none focus:ring-2 focus:ring-[#82AAFF] focus:ring-offset-2 transition-colors shadow-md touch-target flex-1 sm:flex-none text-sm sm:text-base font-medium"
+                aria-label={showCreateForm ? 'Cancel board creation' : 'Create new board'}
+                aria-expanded={showCreateForm}
+              >
+                {showCreateForm ? 'Cancel' : 'Create Board'}
+              </button>
+            </div>
           )}
         </div>
 
@@ -219,6 +268,57 @@ function BoardList() {
           </form>
         )}
 
+        {/* Template selection form - only for Admins */}
+        {isAdmin() && showTemplateForm && (
+          <form 
+            onSubmit={handleCreateFromTemplate} 
+            className="bg-white p-5 sm:p-6 rounded-lg shadow-sm mb-6 border border-[#B19CD9]"
+            aria-label="Create board from template form"
+          >
+            <h3 className="text-lg font-semibold text-gray-700 mb-4">Create from Template</h3>
+            <div className="mb-4">
+              <label htmlFor="template-select" className="block text-sm sm:text-base font-medium text-gray-600 mb-1">
+                Select Template
+              </label>
+              <select
+                id="template-select"
+                value={selectedTemplateId || ''}
+                onChange={(e) => setSelectedTemplateId(e.target.value ? parseInt(e.target.value) : null)}
+                className="w-full px-4 py-3 sm:py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#B19CD9] focus:border-transparent text-base"
+                required
+              >
+                <option value="">-- Select a template --</option>
+                {templates.map((template) => (
+                  <option key={template.id} value={template.id}>
+                    {template.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="mb-4">
+              <label htmlFor="template-board-name" className="block text-sm sm:text-base font-medium text-gray-600 mb-1">
+                New Board Name
+              </label>
+              <input
+                id="template-board-name"
+                type="text"
+                value={templateBoardName}
+                onChange={(e) => setTemplateBoardName(e.target.value)}
+                className="w-full px-4 py-3 sm:py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#B19CD9] focus:border-transparent text-base"
+                placeholder="Enter name for new board"
+                required
+              />
+            </div>
+            <button
+              type="submit"
+              className="bg-[#B19CD9] text-white px-5 sm:px-6 py-2.5 sm:py-2 rounded-md hover:bg-[#9B86C9] focus:outline-none focus:ring-2 focus:ring-[#B19CD9] focus:ring-offset-2 transition-colors shadow-md touch-target text-sm sm:text-base font-medium"
+              aria-label="Create board from template"
+            >
+              Create from Template
+            </button>
+          </form>
+        )}
+
         {boards.length === 0 ? (
           <div className="text-center py-12 sm:py-20 text-gray-600" role="status" aria-live="polite">
             <p className="text-base sm:text-lg">
@@ -254,6 +354,11 @@ function BoardList() {
                   {board.isPublic && (
                     <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 ml-2">
                       Public
+                    </span>
+                  )}
+                  {board.isTemplate && (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 ml-2">
+                      Template
                     </span>
                   )}
                 </div>

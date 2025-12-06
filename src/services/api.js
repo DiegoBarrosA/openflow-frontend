@@ -240,6 +240,68 @@ export const setTaskCustomFieldValues = async (taskId, fieldValues) => {
   return response.data;
 };
 
+/**
+ * Get visible custom field values for a task (fields marked as showInCard).
+ * @param {number} taskId - Task ID
+ * @param {number} boardId - Board ID
+ */
+export const getTaskVisibleFieldValues = async (taskId, boardId) => {
+  const response = await api.get(`/custom-fields/values/task/${taskId}/visible?boardId=${boardId}`);
+  return response.data;
+};
+
+// ==================== Board Templates ====================
+
+/**
+ * Get all templates for the current user.
+ */
+export const getTemplates = async () => {
+  const response = await api.get('/boards/templates');
+  return response.data;
+};
+
+/**
+ * Create a board from a template.
+ * @param {number} templateId - Template board ID
+ * @param {string} name - Name for the new board
+ */
+export const createBoardFromTemplate = async (templateId, name) => {
+  const response = await api.post(`/boards/from-template/${templateId}`, { name });
+  return response.data;
+};
+
+/**
+ * Update a board (including isTemplate).
+ * @param {number} id - Board ID
+ * @param {object} boardData - Board data
+ */
+export const updateBoard = async (id, boardData) => {
+  const response = await api.put(`/boards/${id}`, boardData);
+  return response.data;
+};
+
+// ==================== Status Management ====================
+
+/**
+ * Update a status (name, color, order).
+ * @param {number} id - Status ID
+ * @param {object} statusData - Status data { name, color, boardId, order }
+ */
+export const updateStatus = async (id, statusData) => {
+  const response = await api.put(`/statuses/${id}`, statusData);
+  return response.data;
+};
+
+/**
+ * Reorder statuses for a board.
+ * @param {number} boardId - Board ID
+ * @param {number[]} statusIds - Ordered list of status IDs
+ */
+export const reorderStatuses = async (boardId, statusIds) => {
+  const response = await api.put(`/statuses/board/${boardId}/reorder`, statusIds);
+  return response.data;
+};
+
 // ==================== Change History ====================
 
 /**
@@ -257,6 +319,16 @@ export const getTaskHistory = async (taskId) => {
  */
 export const getBoardHistory = async (boardId) => {
   const response = await api.get(`/history/boards/${boardId}`);
+  return response.data;
+};
+
+// ==================== Users ====================
+
+/**
+ * Get all users for task assignment.
+ */
+export const getAllUsers = async () => {
+  const response = await api.get('/auth/users');
   return response.data;
 };
 

@@ -30,7 +30,8 @@ const CustomFieldManager = ({ boardId, onClose }) => {
     name: '',
     fieldType: 'TEXT',
     options: [],
-    isRequired: false
+    isRequired: false,
+    showInCard: false
   });
   const [optionInput, setOptionInput] = useState('');
 
@@ -56,7 +57,8 @@ const CustomFieldManager = ({ boardId, onClose }) => {
       name: '',
       fieldType: 'TEXT',
       options: [],
-      isRequired: false
+      isRequired: false,
+      showInCard: false
     });
     setOptionInput('');
     setIsAdding(false);
@@ -91,7 +93,8 @@ const CustomFieldManager = ({ boardId, onClose }) => {
       name: definition.name,
       fieldType: definition.fieldType,
       options: definition.options || [],
-      isRequired: definition.isRequired || false
+      isRequired: definition.isRequired || false,
+      showInCard: definition.showInCard || false
     });
     setEditingId(definition.id);
     setIsAdding(true);
@@ -166,6 +169,11 @@ const CustomFieldManager = ({ boardId, onClose }) => {
                       </span>
                       {def.isRequired && (
                         <span className="ml-2 text-xs text-red-500">Required</span>
+                      )}
+                      {def.showInCard && (
+                        <span className="ml-2 text-xs text-purple-600 bg-purple-100 px-2 py-0.5 rounded">
+                          Visible
+                        </span>
                       )}
                     </div>
                     <div className="flex gap-2">
@@ -278,6 +286,19 @@ const CustomFieldManager = ({ boardId, onClose }) => {
                   />
                   <label htmlFor="isRequired" className="text-sm text-gray-700">
                     Required field
+                  </label>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="showInCard"
+                    checked={formData.showInCard}
+                    onChange={(e) => setFormData(prev => ({ ...prev, showInCard: e.target.checked }))}
+                    className="rounded border-gray-300"
+                  />
+                  <label htmlFor="showInCard" className="text-sm text-gray-700">
+                    Show in task card (max 3)
                   </label>
                 </div>
 
