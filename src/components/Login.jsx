@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api, { azureLogin } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
+import { useTranslation } from '../contexts/I18nContext';
+import LanguageSwitcher from './LanguageSwitcher';
+import ThemeSwitcher from './ThemeSwitcher';
 
 function Login() {
   const [username, setUsername] = useState('');
@@ -9,6 +12,7 @@ function Login() {
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const { login } = useAuth();
+  const t = useTranslation();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,37 +24,44 @@ function Login() {
       login(response.data.token, response.data.username, response.data.role);
       navigate('/boards');
     } catch (err) {
-      setError('Invalid username or password');
+      setError(t('auth.login.invalidCredentials'));
     }
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#82AAFF] via-[#88D8C0] to-[#B19CD9] container-responsive py-8">
-      <div className="bg-white p-6 sm:p-8 md:p-10 rounded-lg shadow-xl w-full max-w-md border border-gray-200">
-        <h1 className="text-responsive-xl font-bold text-center text-[#82AAFF] mb-2" aria-label="OpenFlow Application">
+    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-base-0D via-base-0C to-base-0E container-responsive py-8">
+      <div className="bg-base-07 dark:bg-base-01 p-6 sm:p-8 md:p-10 rounded-lg shadow-xl w-full max-w-md border border-base-02 dark:border-base-03">
+        <div className="flex justify-end gap-2 mb-4">
+          <LanguageSwitcher />
+          <ThemeSwitcher />
+        </div>
+        <h1 className="text-responsive-xl font-bold text-center text-base-0D mb-2" aria-label="OpenFlow Application">
+          <i className="fas fa-project-diagram mr-2" aria-hidden="true"></i>
           OpenFlow
         </h1>
-        <h2 className="text-responsive-lg font-semibold text-center text-gray-700 mb-6">Login</h2>
+        <h2 className="text-responsive-lg font-semibold text-center text-base-05 mb-6">{t('auth.login.title')}</h2>
         {error && (
           <div 
             role="alert" 
             aria-live="polite"
-            className="bg-red-50 text-red-600 p-3 rounded-md mb-4 text-center border border-red-200 text-sm sm:text-base"
+            className="bg-base-08/10 dark:bg-base-08/20 text-base-08 p-3 rounded-md mb-4 text-center border border-base-08/30 dark:border-base-08/50 text-sm sm:text-base"
           >
+            <i className="fas fa-exclamation-circle mr-2" aria-hidden="true"></i>
             {error}
           </div>
         )}
-        <form onSubmit={handleSubmit} className="space-y-4" aria-label="Login form">
+        <form onSubmit={handleSubmit} className="space-y-4" aria-label={t('auth.login.title')}>
           <div>
-            <label htmlFor="username" className="block text-sm sm:text-base font-medium text-gray-600 mb-1">
-              Username
+            <label htmlFor="username" className="block text-sm sm:text-base font-medium text-base-05 mb-1">
+              <i className="fas fa-user mr-2" aria-hidden="true"></i>
+              {t('auth.login.username')}
             </label>
             <input
               id="username"
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-4 py-3 sm:py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#82AAFF] focus:border-transparent text-base touch-target"
+              className="w-full px-4 py-3 sm:py-2.5 border border-base-03 dark:border-base-02 rounded-md focus:outline-none focus:ring-2 focus:ring-base-0D focus:border-transparent text-base touch-target bg-base-07 dark:bg-base-00 text-base-05"
               required
               aria-required="true"
               aria-describedby={error ? "error-message" : undefined}
@@ -58,15 +69,16 @@ function Login() {
             />
           </div>
           <div>
-            <label htmlFor="password" className="block text-sm sm:text-base font-medium text-gray-600 mb-1">
-              Password
+            <label htmlFor="password" className="block text-sm sm:text-base font-medium text-base-05 mb-1">
+              <i className="fas fa-lock mr-2" aria-hidden="true"></i>
+              {t('auth.login.password')}
             </label>
             <input
               id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 sm:py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#82AAFF] focus:border-transparent text-base touch-target"
+              className="w-full px-4 py-3 sm:py-2.5 border border-base-03 dark:border-base-02 rounded-md focus:outline-none focus:ring-2 focus:ring-base-0D focus:border-transparent text-base touch-target bg-base-07 dark:bg-base-00 text-base-05"
               required
               aria-required="true"
               aria-describedby={error ? "error-message" : undefined}
@@ -75,45 +87,41 @@ function Login() {
           </div>
           <button
             type="submit"
-            className="w-full bg-[#82AAFF] text-white py-3 sm:py-2.5 px-4 rounded-md hover:bg-[#6B8FE8] focus:outline-none focus:ring-2 focus:ring-[#82AAFF] focus:ring-offset-2 transition-colors shadow-md touch-target text-base sm:text-sm font-medium"
-            aria-label="Submit login form"
+            className="w-full bg-base-0D text-base-07 py-3 sm:py-2.5 px-4 rounded-md hover:bg-base-0D/90 focus:outline-none focus:ring-2 focus:ring-base-0D focus:ring-offset-2 transition-colors shadow-md touch-target text-base sm:text-sm font-medium"
+            aria-label={t('common.login')}
           >
-            Login
+            <i className="fas fa-sign-in-alt mr-2" aria-hidden="true"></i>
+            {t('common.login')}
           </button>
         </form>
         
         <div className="relative my-6">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300"></div>
+            <div className="w-full border-t border-base-03 dark:border-base-02"></div>
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white text-gray-500">Or</span>
+            <span className="px-2 bg-base-07 dark:bg-base-01 text-base-04">{t('common.or')}</span>
           </div>
         </div>
         
         <button
           type="button"
           onClick={azureLogin}
-          className="w-full bg-white text-gray-700 py-3 sm:py-2.5 px-4 rounded-md border-2 border-gray-300 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#82AAFF] focus:ring-offset-2 transition-colors shadow-md touch-target text-base sm:text-sm font-medium flex items-center justify-center gap-2"
-          aria-label="Sign in with Microsoft"
+          className="w-full bg-base-07 dark:bg-base-01 text-base-05 py-3 sm:py-2.5 px-4 rounded-md border-2 border-base-03 dark:border-base-02 hover:border-base-04 focus:outline-none focus:ring-2 focus:ring-base-0D focus:ring-offset-2 transition-colors shadow-md touch-target text-base sm:text-sm font-medium flex items-center justify-center gap-2"
+          aria-label={t('auth.login.signInWithMicrosoft')}
         >
-          <svg className="w-5 h-5" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M0 0H10.7778V10.7778H0V0Z" fill="#F25022"/>
-            <path d="M12.2222 0H23V10.7778H12.2222V0Z" fill="#7FBA00"/>
-            <path d="M0 12.2222H10.7778V23H0V12.2222Z" fill="#00A4EF"/>
-            <path d="M12.2222 12.2222H23V23H12.2222V12.2222Z" fill="#FFB900"/>
-          </svg>
-          Sign in with Microsoft
+          <i className="fab fa-microsoft text-xl" aria-hidden="true"></i>
+          {t('auth.login.signInWithMicrosoft')}
         </button>
         
-        <p className="text-center mt-6 text-gray-600 text-sm sm:text-base">
-          Don't have an account?{' '}
+        <p className="text-center mt-6 text-base-05 text-sm sm:text-base">
+          {t('auth.login.dontHaveAccount')}{' '}
           <Link 
             to="/register" 
-            className="text-[#82AAFF] hover:text-[#6B8FE8] font-medium underline-offset-2 hover:underline focus:outline-none focus:ring-2 focus:ring-[#82AAFF] focus:ring-offset-2 rounded"
-            aria-label="Navigate to registration page"
+            className="text-base-0D hover:text-base-0D/80 font-medium underline-offset-2 hover:underline focus:outline-none focus:ring-2 focus:ring-base-0D focus:ring-offset-2 rounded"
+            aria-label={t('auth.login.registerLink')}
           >
-            Register
+            {t('auth.login.registerLink')}
           </Link>
         </p>
       </div>

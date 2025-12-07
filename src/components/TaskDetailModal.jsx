@@ -3,11 +3,13 @@ import CustomFields from './CustomFields';
 import ChangeHistory from './ChangeHistory';
 import SubscribeButton from './SubscribeButton';
 import { getAllUsers } from '../services/api';
+import { useTranslation } from '../contexts/I18nContext';
 
 /**
  * TaskDetailModal - A larger modal for viewing and editing task details.
  */
 function TaskDetailModal({ task, boardId, onClose, onUpdate, onDelete }) {
+  const t = useTranslation();
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(task.title);
   const [description, setDescription] = useState(task.description || '');
@@ -64,7 +66,7 @@ function TaskDetailModal({ task, boardId, onClose, onUpdate, onDelete }) {
   };
 
   const handleDelete = () => {
-    if (window.confirm('Are you sure you want to delete this task?')) {
+    if (window.confirm(t('board.deleteTaskConfirm'))) {
       onDelete(task.id);
       onClose();
     }
@@ -78,7 +80,7 @@ function TaskDetailModal({ task, boardId, onClose, onUpdate, onDelete }) {
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
       onClick={onClose}
       onKeyDown={handleKeyDown}
       role="dialog"
@@ -86,34 +88,32 @@ function TaskDetailModal({ task, boardId, onClose, onUpdate, onDelete }) {
       aria-labelledby="task-detail-title"
     >
       <div
-        className="bg-white rounded-xl w-full max-w-2xl shadow-2xl border border-gray-200 max-h-[90vh] overflow-hidden flex flex-col"
+        className="bg-base-07 dark:bg-base-01 rounded-xl w-full max-w-2xl shadow-2xl border border-base-02 dark:border-base-03 max-h-[90vh] overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className={`flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 transition-all duration-300 ${
+        <div className={`flex items-center justify-between p-4 sm:p-6 border-b border-base-02 dark:border-base-03 transition-all duration-300 ${
           saveSuccess 
-            ? 'bg-gradient-to-r from-[#88D8C0]/30 to-[#88D8C0]/10' 
-            : 'bg-gradient-to-r from-[#82AAFF]/10 to-[#B19CD9]/10'
+            ? 'bg-gradient-to-r from-base-0B/30 to-base-0B/10' 
+            : 'bg-gradient-to-r from-base-0D/10 to-base-0E/10'
         }`}>
           <div className="flex items-center gap-3 flex-1 min-w-0">
             {saveSuccess ? (
-              <div className="flex items-center gap-2 text-[#2E8B57]">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span className="text-lg font-semibold">Saved successfully!</span>
+              <div className="flex items-center gap-2 text-base-0B">
+                <i className="fas fa-check-circle text-xl" aria-hidden="true"></i>
+                <span className="text-lg font-semibold">{t('task.savedSuccessfully')}</span>
               </div>
             ) : isEditing ? (
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="flex-1 text-lg sm:text-xl font-bold text-gray-800 bg-white px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#82AAFF] focus:border-transparent"
-                placeholder="Task title"
+                className="flex-1 text-lg sm:text-xl font-bold text-base-05 bg-base-07 dark:bg-base-00 px-3 py-2 border border-base-03 dark:border-base-02 rounded-md focus:outline-none focus:ring-2 focus:ring-base-0D focus:border-transparent"
+                placeholder={t('task.taskTitle')}
                 autoFocus
               />
             ) : (
-              <h2 id="task-detail-title" className="text-lg sm:text-xl font-bold text-gray-800 truncate">
+              <h2 id="task-detail-title" className="text-lg sm:text-xl font-bold text-base-05 truncate">
                 {task.title}
               </h2>
             )}
@@ -122,10 +122,10 @@ function TaskDetailModal({ task, boardId, onClose, onUpdate, onDelete }) {
             <SubscribeButton entityType="TASK" entityId={task.id} size="sm" />
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 text-2xl leading-none w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-full transition-all"
-              aria-label="Close modal"
+              className="text-base-04 hover:text-base-05 text-2xl leading-none w-8 h-8 flex items-center justify-center hover:bg-base-01 dark:hover:bg-base-02 rounded-full transition-all"
+              aria-label={t('common.close')}
             >
-              ×
+              <i className="fas fa-times" aria-hidden="true"></i>
             </button>
           </div>
         </div>
@@ -135,16 +135,17 @@ function TaskDetailModal({ task, boardId, onClose, onUpdate, onDelete }) {
           <div className="space-y-6">
             {/* Assigned User */}
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">
-                Assigned To
+              <label className="block text-sm font-medium text-base-05 mb-2">
+                <i className="fas fa-user mr-2" aria-hidden="true"></i>
+                {t('task.assignedTo')}
               </label>
               {isEditing ? (
                 <select
                   value={assignedUserId || ''}
                   onChange={(e) => setAssignedUserId(e.target.value ? parseInt(e.target.value) : null)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#82AAFF] focus:border-transparent text-base"
+                  className="w-full px-4 py-3 border border-base-03 dark:border-base-02 rounded-md focus:outline-none focus:ring-2 focus:ring-base-0D focus:border-transparent text-base bg-base-07 dark:bg-base-00 text-base-05"
                 >
-                  <option value="">-- Unassigned --</option>
+                  <option value="">-- {t('task.unassigned')} --</option>
                   {users.map((user) => (
                     <option key={user.id} value={user.id}>
                       {user.username}
@@ -153,18 +154,18 @@ function TaskDetailModal({ task, boardId, onClose, onUpdate, onDelete }) {
                 </select>
               ) : (
                 <div 
-                  className="w-full px-4 py-3 bg-gray-50 rounded-md cursor-pointer hover:bg-gray-100 transition-colors flex items-center gap-2"
+                  className="w-full px-4 py-3 bg-base-01 dark:bg-base-02 rounded-md cursor-pointer hover:bg-base-02 dark:hover:bg-base-03 transition-colors flex items-center gap-2"
                   onClick={() => setIsEditing(true)}
                 >
                   {task.assignedUsername ? (
                     <>
-                      <div className="w-8 h-8 rounded-full bg-[#88D8C0] flex items-center justify-center text-gray-800 font-semibold text-sm">
+                      <div className="w-8 h-8 rounded-full bg-base-0C flex items-center justify-center text-base-00 dark:text-base-05 font-semibold text-sm">
                         {task.assignedUsername.charAt(0).toUpperCase()}
                       </div>
-                      <span className="text-gray-700">{task.assignedUsername}</span>
+                      <span className="text-base-05">{task.assignedUsername}</span>
                     </>
                   ) : (
-                    <span className="text-gray-400 italic">Unassigned. Click to assign...</span>
+                    <span className="text-base-04 italic">{t('task.unassignedClickToAssign')}</span>
                   )}
                 </div>
               )}
@@ -172,22 +173,23 @@ function TaskDetailModal({ task, boardId, onClose, onUpdate, onDelete }) {
 
             {/* Description */}
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">
-                Description
+              <label className="block text-sm font-medium text-base-05 mb-2">
+                <i className="fas fa-align-left mr-2" aria-hidden="true"></i>
+                {t('task.description')}
               </label>
               {isEditing ? (
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#82AAFF] focus:border-transparent min-h-[120px] resize-y text-base"
-                  placeholder="Add a description..."
+                  className="w-full px-4 py-3 border border-base-03 dark:border-base-02 rounded-md focus:outline-none focus:ring-2 focus:ring-base-0D focus:border-transparent min-h-[120px] resize-y text-base bg-base-07 dark:bg-base-00 text-base-05"
+                  placeholder={t('task.addDescription')}
                 />
               ) : (
                 <div 
-                  className="w-full px-4 py-3 bg-gray-50 rounded-md text-gray-700 min-h-[60px] cursor-pointer hover:bg-gray-100 transition-colors"
+                  className="w-full px-4 py-3 bg-base-01 dark:bg-base-02 rounded-md text-base-05 min-h-[60px] cursor-pointer hover:bg-base-02 dark:hover:bg-base-03 transition-colors"
                   onClick={() => setIsEditing(true)}
                 >
-                  {description || <span className="text-gray-400 italic">No description. Click to add...</span>}
+                  {description || <span className="text-base-04 italic">{t('task.noDescriptionClickToAdd')}</span>}
                 </div>
               )}
             </div>
@@ -202,20 +204,21 @@ function TaskDetailModal({ task, boardId, onClose, onUpdate, onDelete }) {
             </div>
 
             {/* Change History */}
-            <div className="border-t border-gray-200 pt-4">
+            <div className="border-t border-base-02 dark:border-base-03 pt-4">
               <ChangeHistory entityType="task" entityId={task.id} />
             </div>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between p-4 sm:p-6 border-t border-gray-200 bg-gray-50">
+        <div className="flex items-center justify-between p-4 sm:p-6 border-t border-base-02 dark:border-base-03 bg-base-01 dark:bg-base-02">
           <button
             onClick={handleDelete}
-            className="text-red-600 hover:text-red-800 hover:bg-red-50 px-4 py-2 rounded-md transition-colors text-sm font-medium"
-            aria-label="Delete task"
+            className="text-base-08 hover:text-base-08/80 hover:bg-base-08/10 px-4 py-2 rounded-md transition-colors text-sm font-medium"
+            aria-label={t('board.deleteTask')}
           >
-            Delete Task
+            <i className="fas fa-trash mr-2" aria-hidden="true"></i>
+            {t('board.deleteTask')}
           </button>
           
           <div className="flex items-center gap-3">
@@ -223,32 +226,45 @@ function TaskDetailModal({ task, boardId, onClose, onUpdate, onDelete }) {
               <>
                 <button
                   onClick={handleCancel}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md transition-colors text-sm font-medium"
+                  className="px-4 py-2 text-base-05 hover:text-base-05 hover:bg-base-01 dark:hover:bg-base-02 rounded-md transition-colors text-sm font-medium"
                   disabled={isSaving}
                 >
-                  Cancel
+                  <i className="fas fa-times mr-2" aria-hidden="true"></i>
+                  {t('common.cancel')}
                 </button>
                 <button
                   onClick={handleSave}
                   disabled={isSaving}
-                  className="bg-[#82AAFF] text-white px-5 py-2 rounded-md hover:bg-[#6B8FE8] focus:outline-none focus:ring-2 focus:ring-[#82AAFF] focus:ring-offset-2 transition-colors shadow-sm text-sm font-medium disabled:opacity-50"
+                  className="bg-base-0D text-base-07 px-5 py-2 rounded-md hover:bg-base-0D/90 focus:outline-none focus:ring-2 focus:ring-base-0D focus:ring-offset-2 transition-colors shadow-sm text-sm font-medium disabled:opacity-50"
                 >
-                  {isSaving ? 'Saving...' : 'Save Changes'}
+                  {isSaving ? (
+                    <>
+                      <i className="fas fa-spinner fa-spin mr-2" aria-hidden="true"></i>
+                      {t('task.saving')}
+                    </>
+                  ) : (
+                    <>
+                      <i className="fas fa-save mr-2" aria-hidden="true"></i>
+                      {t('board.saveChanges')}
+                    </>
+                  )}
                 </button>
               </>
             ) : (
               <>
                 <button
                   onClick={onClose}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md transition-colors text-sm font-medium"
+                  className="px-4 py-2 text-base-05 hover:text-base-05 hover:bg-base-01 dark:hover:bg-base-02 rounded-md transition-colors text-sm font-medium"
                 >
-                  Close
+                  <i className="fas fa-times mr-2" aria-hidden="true"></i>
+                  {t('common.close')}
                 </button>
                 <button
                   onClick={() => setIsEditing(true)}
-                  className="bg-[#82AAFF] text-white px-5 py-2 rounded-md hover:bg-[#6B8FE8] focus:outline-none focus:ring-2 focus:ring-[#82AAFF] focus:ring-offset-2 transition-colors shadow-sm text-sm font-medium"
+                  className="bg-base-0D text-base-07 px-5 py-2 rounded-md hover:bg-base-0D/90 focus:outline-none focus:ring-2 focus:ring-base-0D focus:ring-offset-2 transition-colors shadow-sm text-sm font-medium"
                 >
-                  Edit Task
+                  <i className="fas fa-edit mr-2" aria-hidden="true"></i>
+                  {t('task.editTask')}
                 </button>
               </>
             )}

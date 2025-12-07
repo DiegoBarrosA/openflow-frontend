@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { getNotifications, getUnreadNotificationCount, markNotificationAsRead, markAllNotificationsAsRead } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
+import { useTranslation } from '../contexts/I18nContext';
 
 /**
  * NotificationBell component - displays notification icon with unread count and dropdown panel.
  */
 const NotificationBell = () => {
   const { isAuthenticated } = useAuth();
+  const t = useTranslation();
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
@@ -93,18 +95,18 @@ const NotificationBell = () => {
     const hours = Math.floor(diff / 3600000);
     const days = Math.floor(diff / 86400000);
 
-    if (minutes < 1) return 'Just now';
-    if (minutes < 60) return `${minutes}m ago`;
-    if (hours < 24) return `${hours}h ago`;
-    if (days < 7) return `${days}d ago`;
+    if (minutes < 1) return t('common.justNow');
+    if (minutes < 60) return `${minutes}${t('common.minutesAgo')}`;
+    if (hours < 24) return `${hours}${t('common.hoursAgo')}`;
+    if (days < 7) return `${days}${t('common.daysAgo')}`;
     return date.toLocaleDateString();
   };
 
   const getNotificationIcon = (type) => {
-    if (type.includes('TASK')) return '📋';
-    if (type.includes('BOARD')) return '📊';
-    if (type.includes('STATUS')) return '📌';
-    return '🔔';
+    if (type.includes('TASK')) return 'fa-clipboard-list';
+    if (type.includes('BOARD')) return 'fa-th-large';
+    if (type.includes('STATUS')) return 'fa-tag';
+    return 'fa-bell';
   };
 
   if (!isAuthenticated()) {
@@ -115,71 +117,74 @@ const NotificationBell = () => {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={handleOpen}
-        className="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors"
-        aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ''}`}
+        className="relative p-2 text-base-04 hover:text-base-05 hover:bg-base-01 dark:hover:bg-base-02 rounded-full transition-colors"
+        aria-label={`${t('board.notifications')}${unreadCount > 0 ? ` (${unreadCount} ${t('common.unread')})` : ''}`}
       >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-        </svg>
+        <i className="fas fa-bell text-xl" aria-hidden="true"></i>
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium">
+          <span className="absolute -top-1 -right-1 bg-base-08 text-base-07 text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium">
             {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-[70vh] overflow-hidden flex flex-col">
-          <div className="p-3 border-b flex justify-between items-center">
-            <h3 className="font-semibold text-gray-900">Notifications</h3>
+        <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-base-07 dark:bg-base-01 rounded-lg shadow-lg border border-base-02 dark:border-base-03 z-50 max-h-[70vh] overflow-hidden flex flex-col">
+          <div className="p-3 border-b border-base-02 dark:border-base-03 flex justify-between items-center">
+            <h3 className="font-semibold text-base-05">
+              <i className="fas fa-bell mr-2" aria-hidden="true"></i>
+              {t('board.notifications')}
+            </h3>
             {unreadCount > 0 && (
               <button
                 onClick={handleMarkAllAsRead}
-                className="text-xs text-blue-600 hover:text-blue-800"
+                className="text-xs text-base-0D hover:text-base-0D/80"
               >
-                Mark all as read
+                {t('board.markAllAsRead')}
               </button>
             )}
           </div>
 
           <div className="overflow-y-auto flex-1">
             {loading ? (
-              <div className="p-4 text-center text-gray-500">Loading...</div>
+              <div className="p-4 text-center text-base-04">
+                <i className="fas fa-spinner fa-spin mr-2" aria-hidden="true"></i>
+                {t('common.loading')}
+              </div>
             ) : notifications.length === 0 ? (
-              <div className="p-8 text-center text-gray-500">
-                <div className="text-3xl mb-2">🔔</div>
-                <p>No notifications yet</p>
+              <div className="p-8 text-center text-base-04">
+                <i className="fas fa-bell-slash text-4xl mb-2" aria-hidden="true"></i>
+                <p>{t('board.noNotifications')}</p>
               </div>
             ) : (
-              <div className="divide-y">
+              <div className="divide-y divide-base-02 dark:divide-base-03">
                 {notifications.map((notification) => (
                   <div
                     key={notification.id}
-                    className={`p-3 hover:bg-gray-50 cursor-pointer transition-colors ${
-                      !notification.isRead ? 'bg-blue-50' : ''
+                    className={`p-3 hover:bg-base-01 dark:hover:bg-base-02 cursor-pointer transition-colors ${
+                      !notification.isRead ? 'bg-base-0D/10 dark:bg-base-0D/20' : ''
                     }`}
                     onClick={() => !notification.isRead && handleMarkAsRead(notification.id)}
                   >
                     <div className="flex gap-3">
-                      <span className="text-lg">{getNotificationIcon(notification.type)}</span>
+                      <i className={`fas ${getNotificationIcon(notification.type)} text-lg text-base-0D mt-1`} aria-hidden="true"></i>
                       <div className="flex-1 min-w-0">
-                        <p className={`text-sm ${!notification.isRead ? 'font-medium' : ''} text-gray-900 line-clamp-2`}>
+                        <p className={`text-sm ${!notification.isRead ? 'font-medium' : ''} text-base-05 line-clamp-2`}>
                           {notification.message}
                         </p>
                         <div className="flex items-center gap-2 mt-1">
-                          <span className="text-xs text-gray-500">
+                          <span className="text-xs text-base-04">
                             {formatTime(notification.createdAt)}
                           </span>
                           {notification.referenceType && (
-                            <span className="text-xs text-gray-400">
+                            <span className="text-xs text-base-04">
                               {notification.referenceType} #{notification.referenceId}
                             </span>
                           )}
                         </div>
                       </div>
                       {!notification.isRead && (
-                        <span className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-2"></span>
+                        <span className="w-2 h-2 bg-base-0D rounded-full flex-shrink-0 mt-2"></span>
                       )}
                     </div>
                   </div>

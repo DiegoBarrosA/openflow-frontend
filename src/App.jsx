@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { I18nProvider, useI18n } from './contexts/I18nContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import Login from './components/Login';
 import Register from './components/Register';
 import BoardList from './components/BoardList';
@@ -8,6 +10,19 @@ import Board from './components/Board';
 import OAuthCallback from './components/OAuthCallback';
 import PublicBoardList from './components/PublicBoardList';
 import PublicBoard from './components/PublicBoard';
+
+/**
+ * Component to update HTML lang attribute based on current language
+ */
+function LanguageUpdater() {
+  const { language } = useI18n();
+
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
+
+  return null;
+}
 
 /**
  * Private route wrapper - requires authentication.
@@ -18,8 +33,8 @@ const PrivateRoute = ({ children }) => {
   
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F5F5F5]">
-        <div className="text-gray-600">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-base-00">
+        <div className="text-base-05">Loading...</div>
       </div>
     );
   }
@@ -36,8 +51,8 @@ const AdminRoute = ({ children }) => {
   
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F5F5F5]">
-        <div className="text-gray-600">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-base-00">
+        <div className="text-base-05">Loading...</div>
       </div>
     );
   }
@@ -92,11 +107,16 @@ function AppRoutes() {
 function App() {
   return (
     <Router>
-      <AuthProvider>
-        <div className="min-h-screen">
-          <AppRoutes />
-        </div>
-      </AuthProvider>
+      <ThemeProvider>
+        <I18nProvider>
+          <LanguageUpdater />
+          <AuthProvider>
+            <div className="min-h-screen bg-base-00">
+              <AppRoutes />
+            </div>
+          </AuthProvider>
+        </I18nProvider>
+      </ThemeProvider>
     </Router>
   );
 }

@@ -4,6 +4,7 @@ import {
   getTaskCustomFieldValues,
   setTaskCustomFieldValue
 } from '../services/api';
+import { useTranslation } from '../contexts/I18nContext';
 
 // Simple in-memory cache for field definitions (keyed by boardId)
 // Cache entries expire after 5 minutes
@@ -34,6 +35,7 @@ const setCachedDefinitions = (boardId, data) => {
  * - initialValues: Initial values for create mode
  */
 const CustomFields = ({ taskId, boardId, readOnly = false, mode = 'edit', onChange, initialValues = {} }) => {
+  const t = useTranslation();
   const [definitions, setDefinitions] = useState(() => getCachedDefinitions(boardId) || []);
   const [values, setValues] = useState(initialValues);
   const [loading, setLoading] = useState(!getCachedDefinitions(boardId));
@@ -125,7 +127,7 @@ const CustomFields = ({ taskId, boardId, readOnly = false, mode = 'edit', onChan
 
   const validateField = (definition, value) => {
     if (!value && definition.isRequired) {
-      return 'This field is required';
+      return t('board.requiredField');
     }
     
     if (!value) return null;
@@ -133,17 +135,17 @@ const CustomFields = ({ taskId, boardId, readOnly = false, mode = 'edit', onChan
     switch (definition.fieldType) {
       case 'NUMBER':
         if (!/^-?\d*\.?\d*$/.test(value)) {
-          return 'Please enter a valid number';
+          return t('board.fieldValidation.invalidNumber', { defaultValue: 'Please enter a valid number' });
         }
         break;
       case 'DATE':
         if (value && !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-          return 'Please enter a valid date (YYYY-MM-DD)';
+          return t('board.fieldValidation.invalidDate', { defaultValue: 'Please enter a valid date (YYYY-MM-DD)' });
         }
         break;
       case 'DROPDOWN':
         if (value && definition.options && !definition.options.includes(value)) {
-          return 'Please select a valid option';
+          return t('board.fieldValidation.invalidOption', { defaultValue: 'Please select a valid option' });
         }
         break;
       default:
@@ -194,10 +196,10 @@ const CustomFields = ({ taskId, boardId, readOnly = false, mode = 'edit', onChan
     const hasError = !!error;
     const baseInputClass = `w-full px-3 py-2 text-sm border rounded-md transition-all duration-200 
       focus:outline-none focus:ring-2 focus:ring-offset-0 
-      disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed
+      disabled:bg-base-01 dark:bg-base-02 disabled:text-base-04 disabled:cursor-not-allowed
       ${hasError 
-        ? 'border-red-400 focus:ring-red-300 focus:border-red-400 bg-red-50/30' 
-        : 'border-[#B19CD9]/30 focus:ring-[#82AAFF]/30 focus:border-[#82AAFF] bg-white hover:border-[#B19CD9]/50'
+        ? 'border-base-08 focus:ring-base-08/30 focus:border-base-08 bg-base-08/10 dark:bg-base-08/20' 
+        : 'border-base-0E/30 focus:ring-base-0D/30 focus:border-base-0D bg-base-07 dark:bg-base-00 hover:border-base-0E/50 text-base-05'
       }`;
 
     switch (definition.fieldType) {
@@ -209,7 +211,7 @@ const CustomFields = ({ taskId, boardId, readOnly = false, mode = 'edit', onChan
             onChange={(e) => handleValueChange(definition.id, e.target.value, definition)}
             disabled={readOnly || isSaving}
             className={baseInputClass}
-            placeholder={`Enter ${definition.name.toLowerCase()}`}
+            placeholder={t('board.fieldPlaceholder', { fieldName: definition.name, defaultValue: `Enter ${definition.name.toLowerCase()}` })}
           />
         );
 
@@ -221,7 +223,7 @@ const CustomFields = ({ taskId, boardId, readOnly = false, mode = 'edit', onChan
             disabled={readOnly || isSaving}
             rows={3}
             className={`${baseInputClass} resize-y min-h-[60px]`}
-            placeholder={`Enter ${definition.name.toLowerCase()}`}
+            placeholder={t('board.fieldPlaceholder', { fieldName: definition.name, defaultValue: `Enter ${definition.name.toLowerCase()}` })}
           />
         );
 
@@ -262,7 +264,7 @@ const CustomFields = ({ taskId, boardId, readOnly = false, mode = 'edit', onChan
               backgroundPosition: 'right 0.5rem center'
             }}
           >
-            <option value="">Select an option...</option>
+            <option value="">{t('board.selectOption', { defaultValue: 'Select an option...' })}</option>
             {(definition.options || []).map((opt, idx) => (
               <option key={idx} value={opt}>
                 {opt}
@@ -282,16 +284,14 @@ const CustomFields = ({ taskId, boardId, readOnly = false, mode = 'edit', onChan
             disabled={readOnly || isSaving}
             className={`w-6 h-6 rounded-md border-2 transition-all duration-200 flex items-center justify-center
               ${isChecked 
-                ? 'bg-[#88D8C0] border-[#88D8C0] text-white' 
-                : 'bg-white border-[#B19CD9]/40 hover:border-[#B19CD9]'
+                ? 'bg-base-0C border-base-0C text-base-00 dark:text-base-05' 
+                : 'bg-base-07 dark:bg-base-00 border-base-0E/40 hover:border-base-0E'
               }
               ${readOnly || isSaving ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-              focus:outline-none focus:ring-2 focus:ring-[#82AAFF]/30 focus:ring-offset-1`}
+              focus:outline-none focus:ring-2 focus:ring-base-0D/30 focus:ring-offset-1`}
           >
             {isChecked && (
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-              </svg>
+              <i className="fas fa-check text-xs" aria-hidden="true"></i>
             )}
           </button>
         );
@@ -311,17 +311,20 @@ const CustomFields = ({ taskId, boardId, readOnly = false, mode = 'edit', onChan
 
   if (loading) {
     return (
-      <div className="mt-4 pt-4 border-t border-[#B19CD9]/20">
+      <div className="mt-4 pt-4 border-t border-base-0E/20">
         <div className="flex items-center gap-2 mb-3">
-          <div className="w-1 h-4 bg-[#B19CD9] rounded-full"></div>
-          <h4 className="text-sm font-semibold text-gray-700">Custom Fields</h4>
+          <div className="w-1 h-4 bg-base-0E rounded-full"></div>
+          <h4 className="text-sm font-semibold text-base-05">
+            <i className="fas fa-tags mr-2" aria-hidden="true"></i>
+            {t('board.customFields')}
+          </h4>
         </div>
         {/* Skeleton loading */}
         <div className="space-y-3 animate-pulse">
           {[1, 2].map((i) => (
             <div key={i}>
-              <div className="h-4 w-20 bg-gray-200 rounded mb-1.5"></div>
-              <div className="h-10 w-full bg-gray-100 rounded-md border border-gray-200"></div>
+              <div className="h-4 w-20 bg-base-02 dark:bg-base-03 rounded mb-1.5"></div>
+              <div className="h-10 w-full bg-base-01 dark:bg-base-02 rounded-md border border-base-02 dark:border-base-03"></div>
             </div>
           ))}
         </div>
@@ -334,41 +337,36 @@ const CustomFields = ({ taskId, boardId, readOnly = false, mode = 'edit', onChan
   }
 
   return (
-    <div className="mt-4 pt-4 border-t border-[#B19CD9]/20">
+    <div className="mt-4 pt-4 border-t border-base-0E/20">
       <div className="flex items-center gap-2 mb-3">
-        <div className="w-1 h-4 bg-[#B19CD9] rounded-full"></div>
-        <h4 className="text-sm font-semibold text-gray-700">Custom Fields</h4>
+        <div className="w-1 h-4 bg-base-0E rounded-full"></div>
+        <h4 className="text-sm font-semibold text-base-05">
+          <i className="fas fa-tags mr-2" aria-hidden="true"></i>
+          {t('board.customFields')}
+        </h4>
         {loadingValues && (
-          <svg className="animate-spin h-3 w-3 text-[#82AAFF] ml-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
+          <i className="fas fa-spinner fa-spin h-3 w-3 text-base-0D ml-1" aria-hidden="true"></i>
         )}
       </div>
       <div className={`space-y-3 ${loadingValues ? 'opacity-60' : ''}`}>
         {definitions.map((definition) => (
           <div key={definition.id} className={`${definition.fieldType === 'CHECKBOX' ? 'flex items-center gap-3' : ''}`}>
-            <label className={`text-sm font-medium text-gray-600 ${definition.fieldType === 'CHECKBOX' ? 'order-2' : 'block mb-1.5'}`}>
+            <label className={`text-sm font-medium text-base-05 ${definition.fieldType === 'CHECKBOX' ? 'order-2' : 'block mb-1.5'}`}>
               {definition.name}
-              {definition.isRequired && <span className="text-red-400 ml-0.5">*</span>}
+              {definition.isRequired && <span className="text-base-08 ml-0.5">*</span>}
             </label>
             <div className={definition.fieldType === 'CHECKBOX' ? 'order-1' : ''}>
               {renderFieldInput(definition)}
               {errors[definition.id] && (
-                <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
-                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                  </svg>
+                <p className="text-xs text-base-08 mt-1 flex items-center gap-1">
+                  <i className="fas fa-exclamation-circle w-3 h-3" aria-hidden="true"></i>
                   {errors[definition.id]}
                 </p>
               )}
               {savingField === definition.id && (
-                <p className="text-xs text-[#82AAFF] mt-1 flex items-center gap-1">
-                  <svg className="animate-spin h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Saving...
+                <p className="text-xs text-base-0D mt-1 flex items-center gap-1">
+                  <i className="fas fa-spinner fa-spin h-3 w-3" aria-hidden="true"></i>
+                  {t('common.saving', { defaultValue: 'Saving...' })}
                 </p>
               )}
             </div>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getTaskHistory, getBoardHistory } from '../services/api';
+import { useTranslation } from '../contexts/I18nContext';
 
 /**
  * ChangeHistory component - displays a timeline of changes for a task or board.
@@ -8,6 +9,7 @@ import { getTaskHistory, getBoardHistory } from '../services/api';
  * @param {number} entityId - ID of the entity
  */
 const ChangeHistory = ({ entityType, entityId }) => {
+  const t = useTranslation();
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -30,7 +32,7 @@ const ChangeHistory = ({ entityType, entityId }) => {
         setHistory(data || []);
       } catch (err) {
         console.error('Failed to fetch history:', err);
-        setError('Failed to load history');
+        setError(t('history.failedToLoad'));
       } finally {
         setLoading(false);
       }
@@ -39,11 +41,11 @@ const ChangeHistory = ({ entityType, entityId }) => {
     if (isExpanded) {
       fetchHistory();
     }
-  }, [entityType, entityId, isExpanded]);
+  }, [entityType, entityId, isExpanded, t]);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleString('en-US', {
+    return date.toLocaleString(t('common.locale', { defaultValue: 'en-US' }), {
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
@@ -54,105 +56,110 @@ const ChangeHistory = ({ entityType, entityId }) => {
   const getActionIcon = (action) => {
     switch (action) {
       case 'CREATE':
-        return '➕';
+        return 'fa-plus-circle';
       case 'UPDATE':
-        return '✏️';
+        return 'fa-edit';
       case 'DELETE':
-        return '🗑️';
+        return 'fa-trash';
       case 'MOVE':
-        return '↔️';
+        return 'fa-arrows-alt';
       default:
-        return '📝';
+        return 'fa-file-alt';
     }
   };
 
   const getActionColor = (action) => {
     switch (action) {
       case 'CREATE':
-        return 'bg-green-100 text-green-800';
+        return 'bg-base-0B/20 text-base-0B';
       case 'UPDATE':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-base-0D/20 text-base-0D';
       case 'DELETE':
-        return 'bg-red-100 text-red-800';
+        return 'bg-base-08/20 text-base-08';
       case 'MOVE':
-        return 'bg-purple-100 text-purple-800';
+        return 'bg-base-0E/20 text-base-0E';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-base-03/20 text-base-04';
     }
   };
 
   const formatFieldChange = (entry) => {
     if (entry.action === 'CREATE') {
-      return 'Created';
+      return t('history.created');
     }
     if (entry.action === 'DELETE') {
-      return 'Deleted';
+      return t('history.deleted');
     }
     if (entry.action === 'MOVE') {
-      return `Moved from status ${entry.oldValue} to ${entry.newValue}`;
+      return t('history.moved', { oldValue: entry.oldValue, newValue: entry.newValue });
     }
     if (entry.fieldName) {
-      const oldVal = entry.oldValue || '(empty)';
-      const newVal = entry.newValue || '(empty)';
+      const oldVal = entry.oldValue || t('history.empty');
+      const newVal = entry.newValue || t('history.empty');
       return (
         <span>
-          Changed <strong>{entry.fieldName}</strong>: 
-          <span className="line-through text-gray-400 mx-1">{oldVal}</span>
-          → <span className="text-green-600">{newVal}</span>
+          {t('history.changed')} <strong>{entry.fieldName}</strong>: 
+          <span className="line-through text-base-04 mx-1">{oldVal}</span>
+          → <span className="text-base-0B">{newVal}</span>
         </span>
       );
     }
-    return 'Updated';
+    return t('history.updated');
   };
 
   return (
     <div className="mt-4">
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
+        className="flex items-center gap-2 text-sm text-base-04 hover:text-base-05 transition-colors"
       >
-        <span className={`transform transition-transform ${isExpanded ? 'rotate-90' : ''}`}>
-          ▶
-        </span>
-        <span>History</span>
+        <i className={`fas fa-chevron-${isExpanded ? 'down' : 'right'} transform transition-transform`} aria-hidden="true"></i>
+        <span>{t('history.title')}</span>
         {history.length > 0 && !isExpanded && (
-          <span className="bg-gray-200 text-gray-600 text-xs px-2 py-0.5 rounded-full">
+          <span className="bg-base-02 dark:bg-base-03 text-base-05 text-xs px-2 py-0.5 rounded-full">
             {history.length}
           </span>
         )}
       </button>
 
       {isExpanded && (
-        <div className="mt-3 border-l-2 border-gray-200 pl-4 space-y-3">
+        <div className="mt-3 border-l-2 border-base-02 dark:border-base-03 pl-4 space-y-3">
           {loading && (
-            <div className="text-sm text-gray-500">Loading history...</div>
+            <div className="text-sm text-base-04">
+              <i className="fas fa-spinner fa-spin mr-2" aria-hidden="true"></i>
+              {t('history.loading')}
+            </div>
           )}
           
           {error && (
-            <div className="text-sm text-red-500">{error}</div>
+            <div className="text-sm text-base-08">
+              <i className="fas fa-exclamation-circle mr-2" aria-hidden="true"></i>
+              {error}
+            </div>
           )}
           
           {!loading && !error && history.length === 0 && (
-            <div className="text-sm text-gray-500">No history available</div>
+            <div className="text-sm text-base-04">{t('history.noHistory')}</div>
           )}
           
           {!loading && !error && history.map((entry) => (
             <div key={entry.id} className="relative">
               {/* Timeline dot */}
-              <div className="absolute -left-[21px] top-1 w-2.5 h-2.5 bg-gray-300 rounded-full"></div>
+              <div className="absolute -left-[21px] top-1 w-2.5 h-2.5 bg-base-03 dark:bg-base-02 rounded-full"></div>
               
               <div className="text-sm">
                 <div className="flex items-center gap-2 mb-1">
                   <span className={`px-2 py-0.5 rounded text-xs font-medium ${getActionColor(entry.action)}`}>
-                    {getActionIcon(entry.action)} {entry.action}
+                    <i className={`fas ${getActionIcon(entry.action)} mr-1`} aria-hidden="true"></i>
+                    {entry.action}
                   </span>
-                  <span className="text-gray-500 text-xs">
+                  <span className="text-base-04 text-xs">
                     {formatDate(entry.createdAt)}
                   </span>
                 </div>
                 
-                <div className="text-gray-700">
-                  <span className="font-medium text-gray-900">{entry.username || 'System'}</span>
+                <div className="text-base-05">
+                  <span className="font-medium text-base-05">{entry.username || t('history.system')}</span>
                   {' '}
                   {formatFieldChange(entry)}
                 </div>

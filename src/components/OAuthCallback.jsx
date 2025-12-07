@@ -2,11 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
+import { useTranslation } from '../contexts/I18nContext';
 
 function OAuthCallback() {
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const { login } = useAuth();
+  const t = useTranslation();
 
   useEffect(() => {
     const handleCallback = async () => {
@@ -35,10 +37,10 @@ function OAuthCallback() {
               login(authResponse.data.token, authResponse.data.username, authResponse.data.role);
               navigate('/boards');
             } else {
-              setError('Authentication successful but token not received');
+              setError(t('auth.oauth.tokenNotReceived'));
             }
           } else {
-            setError('Authentication failed');
+            setError(t('auth.oauth.failed'));
           }
         } catch (err) {
           // If /auth/me fails, try /auth/azure/success directly
@@ -48,15 +50,15 @@ function OAuthCallback() {
               login(authResponse.data.token, authResponse.data.username, authResponse.data.role);
               navigate('/boards');
             } else {
-              setError('Authentication failed');
+              setError(t('auth.oauth.failed'));
             }
           } catch (authErr) {
-            setError('Authentication failed. Please try logging in again.');
+            setError(t('auth.oauth.pleaseTryAgain'));
             setTimeout(() => navigate('/login'), 3000);
           }
         }
       } catch (err) {
-        setError('An error occurred during authentication');
+        setError(t('auth.oauth.errorOccurred'));
         setTimeout(() => navigate('/login'), 3000);
       }
     };
@@ -65,19 +67,25 @@ function OAuthCallback() {
   }, [navigate, login]);
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#82AAFF] via-[#88D8C0] to-[#B19CD9] container-responsive py-8">
-      <div className="bg-white p-6 sm:p-8 md:p-10 rounded-lg shadow-xl w-full max-w-md border border-gray-200 text-center">
+    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-base-0D via-base-0C to-base-0E container-responsive py-8">
+      <div className="bg-base-07 dark:bg-base-01 p-6 sm:p-8 md:p-10 rounded-lg shadow-xl w-full max-w-md border border-base-02 dark:border-base-03 text-center">
         {error ? (
           <>
-            <h2 className="text-responsive-lg font-semibold text-gray-700 mb-4">Authentication Error</h2>
-            <p className="text-red-600 mb-4">{error}</p>
-            <p className="text-gray-600 text-sm">Redirecting to login...</p>
+            <h2 className="text-responsive-lg font-semibold text-base-05 mb-4">
+              <i className="fas fa-exclamation-triangle mr-2 text-base-08" aria-hidden="true"></i>
+              {t('auth.oauth.error')}
+            </h2>
+            <p className="text-base-08 mb-4">{error}</p>
+            <p className="text-base-04 text-sm">{t('auth.oauth.redirecting')}</p>
           </>
         ) : (
           <>
-            <h2 className="text-responsive-lg font-semibold text-gray-700 mb-4">Completing Sign In</h2>
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#82AAFF] mx-auto"></div>
-            <p className="text-gray-600 mt-4">Please wait...</p>
+            <h2 className="text-responsive-lg font-semibold text-base-05 mb-4">
+              <i className="fas fa-sign-in-alt mr-2" aria-hidden="true"></i>
+              {t('auth.oauth.completing')}
+            </h2>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-base-0D mx-auto"></div>
+            <p className="text-base-04 mt-4">{t('common.loading')}</p>
           </>
         )}
       </div>

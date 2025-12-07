@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { checkSubscription, subscribe, unsubscribe } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
+import { useTranslation } from '../contexts/I18nContext';
 
 /**
  * SubscribeButton component - allows users to subscribe/unsubscribe to tasks or boards.
@@ -11,6 +12,7 @@ import { useAuth } from '../contexts/AuthContext';
  */
 const SubscribeButton = ({ entityType, entityId, size = 'md' }) => {
   const { isAuthenticated } = useAuth();
+  const t = useTranslation();
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -62,9 +64,9 @@ const SubscribeButton = ({ entityType, entityId, size = 'md' }) => {
       <button
         disabled
         className={`${size === 'sm' ? 'text-xs px-2 py-1' : 'text-sm px-3 py-1.5'} 
-                   text-gray-400 rounded border border-gray-200`}
+                   text-base-04 rounded border border-base-02 dark:border-base-03 bg-base-01 dark:bg-base-02`}
       >
-        ...
+        <i className="fas fa-spinner fa-spin" aria-hidden="true"></i>
       </button>
     );
   }
@@ -77,27 +79,23 @@ const SubscribeButton = ({ entityType, entityId, size = 'md' }) => {
         ${size === 'sm' ? 'text-xs px-2 py-1' : 'text-sm px-3 py-1.5'}
         rounded border transition-all flex items-center gap-1
         ${isSubscribed 
-          ? 'bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-200' 
-          : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-100'
+          ? 'bg-base-0D/20 text-base-0D border-base-0D/30 hover:bg-base-0D/30' 
+          : 'bg-base-07 dark:bg-base-01 text-base-05 border-base-02 dark:border-base-03 hover:bg-base-01 dark:hover:bg-base-02'
         }
         ${saving ? 'opacity-50 cursor-not-allowed' : ''}
       `}
-      title={isSubscribed ? 'Unsubscribe from notifications' : 'Subscribe to notifications'}
+      title={isSubscribed ? t('board.unsubscribe') : t('board.subscribe')}
+      aria-label={isSubscribed ? t('board.unsubscribe') : t('board.subscribe')}
     >
       {isSubscribed ? (
         <>
-          <svg className={`${size === 'sm' ? 'w-3 h-3' : 'w-4 h-4'}`} fill="currentColor" viewBox="0 0 20 20">
-            <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
-          </svg>
-          <span>Subscribed</span>
+          <i className={`fas fa-bell ${size === 'sm' ? 'text-xs' : 'text-sm'}`} aria-hidden="true"></i>
+          <span>{t('board.unsubscribe')}</span>
         </>
       ) : (
         <>
-          <svg className={`${size === 'sm' ? 'w-3 h-3' : 'w-4 h-4'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-          </svg>
-          <span>Subscribe</span>
+          <i className={`fas fa-bell-slash ${size === 'sm' ? 'text-xs' : 'text-sm'}`} aria-hidden="true"></i>
+          <span>{t('board.subscribe')}</span>
         </>
       )}
     </button>

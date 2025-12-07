@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { getPublicBoards } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
+import { useTranslation } from '../contexts/I18nContext';
+import LanguageSwitcher from './LanguageSwitcher';
+import ThemeSwitcher from './ThemeSwitcher';
 
 /**
  * Public board list - viewable without authentication.
@@ -13,6 +16,7 @@ function PublicBoardList() {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const { isAuthenticated, getUsername } = useAuth();
+  const t = useTranslation();
   const username = getUsername();
 
   useEffect(() => {
@@ -27,48 +31,56 @@ function PublicBoardList() {
       setError(null);
     } catch (err) {
       console.error('Error fetching public boards:', err);
-      setError('Failed to load public boards');
+      setError(t('board.failedToLoadPublicBoards'));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F5F5]">
-      <header className="bg-[#F5F5F5] text-gray-700 container-responsive py-4 sm:py-5">
+    <div className="min-h-screen bg-base-00">
+      <header className="bg-base-00 text-base-05 container-responsive py-4 sm:py-5">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#82AAFF]">OpenFlow</h1>
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-base-0D">
+            <i className="fas fa-project-diagram mr-2" aria-hidden="true"></i>
+            OpenFlow
+          </h1>
           <div className="flex gap-3 items-center">
+            <LanguageSwitcher />
+            <ThemeSwitcher />
             {isAuthenticated() ? (
               <>
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-[#88D8C0] flex items-center justify-center text-gray-800 font-semibold text-sm">
+                  <div className="w-8 h-8 rounded-full bg-base-0C flex items-center justify-center text-base-00 dark:text-base-05 font-semibold text-sm">
                     {username?.charAt(0).toUpperCase() || 'U'}
                   </div>
-                  <span className="text-gray-700 text-sm font-medium hidden sm:block">
+                  <span className="text-base-05 text-sm font-medium hidden sm:block">
                     {username}
                   </span>
                 </div>
                 <Link
                   to="/boards"
-                  className="bg-[#82AAFF] text-white px-4 py-2 rounded-md hover:bg-[#6B8FE8] transition-colors text-sm font-medium"
+                  className="bg-base-0D text-base-07 px-4 py-2 rounded-md hover:bg-base-0D/90 transition-colors text-sm font-medium"
                 >
-                  My Boards
+                  <i className="fas fa-th-large mr-2" aria-hidden="true"></i>
+                  {t('board.myBoards')}
                 </Link>
               </>
             ) : (
               <>
                 <Link
                   to="/login"
-                  className="bg-[#82AAFF] text-white px-4 py-2 rounded-md hover:bg-[#6B8FE8] transition-colors text-sm font-medium"
+                  className="bg-base-0D text-base-07 px-4 py-2 rounded-md hover:bg-base-0D/90 transition-colors text-sm font-medium"
                 >
-                  Sign In
+                  <i className="fas fa-sign-in-alt mr-2" aria-hidden="true"></i>
+                  {t('board.signIn')}
                 </Link>
                 <Link
                   to="/register"
-                  className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors text-sm font-medium"
+                  className="bg-base-01 dark:bg-base-02 text-base-05 px-4 py-2 rounded-md hover:bg-base-02 dark:hover:bg-base-03 transition-colors text-sm font-medium"
                 >
-                  Register
+                  <i className="fas fa-user-plus mr-2" aria-hidden="true"></i>
+                  {t('common.register')}
                 </Link>
               </>
             )}
@@ -78,37 +90,43 @@ function PublicBoardList() {
 
       <main className="max-w-7xl mx-auto container-responsive py-6 sm:py-8">
         <div className="mb-6">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-700">Public Boards</h2>
-          <p className="text-gray-500 mt-2">Browse boards shared publicly. Sign in to create and manage your own boards.</p>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-base-05">
+            <i className="fas fa-globe mr-2" aria-hidden="true"></i>
+            {t('board.publicBoards')}
+          </h2>
+          <p className="text-base-04 mt-2">{t('board.browsePublicBoards')}</p>
         </div>
 
         {loading ? (
-          <div className="text-center py-12 sm:py-20 text-gray-600" role="status" aria-live="polite">
-            <p className="text-base sm:text-lg">Loading public boards...</p>
+          <div className="text-center py-12 sm:py-20 text-base-04" role="status" aria-live="polite">
+            <i className="fas fa-spinner fa-spin text-4xl mb-4" aria-hidden="true"></i>
+            <p className="text-base sm:text-lg">{t('board.loadingPublicBoards')}</p>
           </div>
         ) : error ? (
-          <div className="text-center py-12 sm:py-20 text-red-600" role="alert">
+          <div className="text-center py-12 sm:py-20 text-base-08" role="alert">
+            <i className="fas fa-exclamation-circle text-4xl mb-4" aria-hidden="true"></i>
             <p className="text-base sm:text-lg">{error}</p>
           </div>
         ) : boards.length === 0 ? (
-          <div className="text-center py-12 sm:py-20 text-gray-600" role="status" aria-live="polite">
-            <p className="text-base sm:text-lg">No public boards available.</p>
-            <p className="text-sm mt-2">Sign in to create your own boards!</p>
+          <div className="text-center py-12 sm:py-20 text-base-04" role="status" aria-live="polite">
+            <i className="fas fa-inbox text-4xl mb-4" aria-hidden="true"></i>
+            <p className="text-base sm:text-lg">{t('board.noPublicBoards')}</p>
+            <p className="text-sm mt-2">{t('board.signInToCreate')}</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6" role="list" aria-label="List of public boards">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6" role="list" aria-label={t('board.publicBoards')}>
             {boards.map((board) => (
               <article
                 key={board.id}
-                className="bg-white rounded-lg shadow-md p-5 sm:p-6 hover:shadow-lg transition-shadow border-l-4 border-[#88D8C0]"
+                className="bg-base-07 dark:bg-base-01 rounded-lg shadow-md p-5 sm:p-6 hover:shadow-lg transition-shadow border-l-4 border-base-0C"
                 role="listitem"
               >
                 <h3
                   onClick={() => navigate(`/public/boards/${board.id}`)}
-                  className="text-lg sm:text-xl font-semibold text-[#82AAFF] mb-2 cursor-pointer hover:text-[#6B8FE8] focus:outline-none focus:ring-2 focus:ring-[#82AAFF] focus:ring-offset-2 rounded"
+                  className="text-lg sm:text-xl font-semibold text-base-0D mb-2 cursor-pointer hover:text-base-0D/80 focus:outline-none focus:ring-2 focus:ring-base-0D focus:ring-offset-2 rounded"
                   tabIndex={0}
                   role="link"
-                  aria-label={`View board: ${board.name}`}
+                  aria-label={`${t('board.viewBoard')}: ${board.name}`}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault();
@@ -116,22 +134,25 @@ function PublicBoardList() {
                     }
                   }}
                 >
+                  <i className="fas fa-clipboard-list mr-2" aria-hidden="true"></i>
                   {board.name}
                 </h3>
                 {board.description && (
-                  <p className="text-gray-600 text-sm sm:text-base mb-4 line-clamp-2">{board.description}</p>
+                  <p className="text-base-04 text-sm sm:text-base mb-4 line-clamp-2">{board.description}</p>
                 )}
                 <div className="flex items-center gap-2">
-                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                    Public
+                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-base-0B/20 text-base-0B">
+                    <i className="fas fa-globe mr-1" aria-hidden="true"></i>
+                    {t('board.public')}
                   </span>
                 </div>
                 <button
                   onClick={() => navigate(`/public/boards/${board.id}`)}
-                  className="mt-4 w-full bg-[#82AAFF] text-white px-4 py-2.5 sm:py-2 rounded-md hover:bg-[#6B8FE8] focus:outline-none focus:ring-2 focus:ring-[#82AAFF] focus:ring-offset-2 transition-colors text-sm shadow-sm font-medium"
-                  aria-label={`View board: ${board.name}`}
+                  className="mt-4 w-full bg-base-0D text-base-07 px-4 py-2.5 sm:py-2 rounded-md hover:bg-base-0D/90 focus:outline-none focus:ring-2 focus:ring-base-0D focus:ring-offset-2 transition-colors text-sm shadow-sm font-medium"
+                  aria-label={`${t('board.viewBoard')}: ${board.name}`}
                 >
-                  View Board
+                  <i className="fas fa-door-open mr-2" aria-hidden="true"></i>
+                  {t('board.viewBoard')}
                 </button>
               </article>
             ))}

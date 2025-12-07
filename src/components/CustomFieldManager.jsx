@@ -5,20 +5,22 @@ import {
   updateCustomFieldDefinition,
   deleteCustomFieldDefinition
 } from '../services/api';
+import { useTranslation } from '../contexts/I18nContext';
 
-const FIELD_TYPES = [
-  { value: 'TEXT', label: 'Text (single line)' },
-  { value: 'TEXTAREA', label: 'Text (multi-line)' },
-  { value: 'NUMBER', label: 'Number' },
-  { value: 'DATE', label: 'Date' },
-  { value: 'DROPDOWN', label: 'Dropdown' },
-  { value: 'CHECKBOX', label: 'Checkbox' }
+const getFieldTypes = (t) => [
+  { value: 'TEXT', label: t('board.fieldTypes.TEXT') },
+  { value: 'TEXTAREA', label: t('board.fieldTypes.TEXTAREA') },
+  { value: 'NUMBER', label: t('board.fieldTypes.NUMBER') },
+  { value: 'DATE', label: t('board.fieldTypes.DATE') },
+  { value: 'DROPDOWN', label: t('board.fieldTypes.DROPDOWN') },
+  { value: 'CHECKBOX', label: t('board.fieldTypes.CHECKBOX') }
 ];
 
 /**
  * CustomFieldManager component - allows admins to manage custom field definitions for a board.
  */
 const CustomFieldManager = ({ boardId, onClose }) => {
+  const t = useTranslation();
   const [definitions, setDefinitions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -45,7 +47,7 @@ const CustomFieldManager = ({ boardId, onClose }) => {
       const data = await getCustomFieldDefinitions(boardId);
       setDefinitions(data);
     } catch (err) {
-      setError('Failed to load custom fields');
+      setError(t('board.failedToLoadCustomFields'));
       console.error(err);
     } finally {
       setLoading(false);
@@ -83,7 +85,7 @@ const CustomFieldManager = ({ boardId, onClose }) => {
       resetForm();
       fetchDefinitions();
     } catch (err) {
-      setError('Failed to save custom field');
+      setError(t('board.failedToSaveCustomField'));
       console.error(err);
     }
   };
@@ -101,14 +103,14 @@ const CustomFieldManager = ({ boardId, onClose }) => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Delete this custom field? All values will be lost.')) {
+    if (!window.confirm(t('board.deleteCustomFieldConfirm'))) {
       return;
     }
     try {
       await deleteCustomFieldDefinition(id);
       fetchDefinitions();
     } catch (err) {
-      setError('Failed to delete custom field');
+      setError(t('board.failedToDeleteCustomField'));
       console.error(err);
     }
   };
@@ -131,63 +133,80 @@ const CustomFieldManager = ({ boardId, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-        <div className="p-4 border-b flex justify-between items-center">
-          <h2 className="text-lg font-semibold text-gray-900">Manage Custom Fields</h2>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-base-07 dark:bg-base-01 rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div className="p-4 border-b border-base-02 dark:border-base-03 flex justify-between items-center">
+          <h2 className="text-lg font-semibold text-base-05">
+            <i className="fas fa-tags mr-2" aria-hidden="true"></i>
+            {t('board.manageCustomFields')}
+          </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 text-2xl leading-none"
+            className="text-base-04 hover:text-base-05 text-2xl leading-none"
+            aria-label={t('common.close')}
           >
-            ×
+            <i className="fas fa-times" aria-hidden="true"></i>
           </button>
         </div>
 
         <div className="p-4">
           {error && (
-            <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">{error}</div>
+            <div className="mb-4 p-3 bg-base-08/10 dark:bg-base-08/20 text-base-08 rounded border border-base-08/30">
+              <i className="fas fa-exclamation-circle mr-2" aria-hidden="true"></i>
+              {error}
+            </div>
           )}
 
           {/* Existing Fields */}
           <div className="mb-6">
-            <h3 className="text-sm font-medium text-gray-700 mb-2">Existing Fields</h3>
+            <h3 className="text-sm font-medium text-base-05 mb-2">
+              <i className="fas fa-list mr-2" aria-hidden="true"></i>
+              {t('board.existingFields')}
+            </h3>
             {loading ? (
-              <div className="text-gray-500">Loading...</div>
+              <div className="text-base-04">
+                <i className="fas fa-spinner fa-spin mr-2" aria-hidden="true"></i>
+                {t('common.loading')}
+              </div>
             ) : definitions.length === 0 ? (
-              <div className="text-gray-500 text-sm">No custom fields defined yet.</div>
+              <div className="text-base-04 text-sm">{t('board.noCustomFieldsDefined')}</div>
             ) : (
               <div className="space-y-2">
                 {definitions.map((def) => (
                   <div
                     key={def.id}
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded border"
+                    className="flex items-center justify-between p-3 bg-base-01 dark:bg-base-02 rounded border border-base-02 dark:border-base-03"
                   >
                     <div>
-                      <span className="font-medium text-gray-900">{def.name}</span>
-                      <span className="ml-2 text-xs text-gray-500 bg-gray-200 px-2 py-0.5 rounded">
+                      <span className="font-medium text-base-05">{def.name}</span>
+                      <span className="ml-2 text-xs text-base-04 bg-base-02 dark:bg-base-03 px-2 py-0.5 rounded">
                         {def.fieldType}
                       </span>
                       {def.isRequired && (
-                        <span className="ml-2 text-xs text-red-500">Required</span>
+                        <span className="ml-2 text-xs text-base-08 bg-base-08/20 px-2 py-0.5 rounded">
+                          {t('board.required')}
+                        </span>
                       )}
                       {def.showInCard && (
-                        <span className="ml-2 text-xs text-purple-600 bg-purple-100 px-2 py-0.5 rounded">
-                          Visible
+                        <span className="ml-2 text-xs text-base-0E bg-base-0E/20 px-2 py-0.5 rounded">
+                          {t('board.visible')}
                         </span>
                       )}
                     </div>
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleEdit(def)}
-                        className="text-blue-600 hover:text-blue-800 text-sm"
+                        className="text-base-0D hover:text-base-0D/80 text-sm"
                       >
-                        Edit
+                        <i className="fas fa-edit mr-1" aria-hidden="true"></i>
+                        {t('common.edit')}
                       </button>
                       <button
                         onClick={() => handleDelete(def.id)}
-                        className="text-red-600 hover:text-red-800 text-sm"
+                        className="text-base-08 hover:text-base-08/80 text-sm"
                       >
-                        Delete
+                        <i className="fas fa-trash mr-1" aria-hidden="true"></i>
+                        {t('common.delete')}
                       </button>
                     </div>
                   </div>
@@ -198,35 +217,36 @@ const CustomFieldManager = ({ boardId, onClose }) => {
 
           {/* Add/Edit Form */}
           {isAdding ? (
-            <form onSubmit={handleSubmit} className="border-t pt-4">
-              <h3 className="text-sm font-medium text-gray-700 mb-3">
-                {editingId ? 'Edit Field' : 'Add New Field'}
+            <form onSubmit={handleSubmit} className="border-t border-base-02 dark:border-base-03 pt-4">
+              <h3 className="text-sm font-medium text-base-05 mb-3">
+                <i className={`fas fa-${editingId ? 'edit' : 'plus'} mr-2`} aria-hidden="true"></i>
+                {editingId ? t('board.editField') : t('board.addNewField')}
               </h3>
               
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Field Name
+                  <label className="block text-sm font-medium text-base-05 mb-1">
+                    {t('board.fieldName')}
                   </label>
                   <input
                     type="text"
                     value={formData.name}
                     onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                    className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-base-03 dark:border-base-02 rounded focus:outline-none focus:ring-2 focus:ring-base-0D bg-base-07 dark:bg-base-00 text-base-05"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Field Type
+                  <label className="block text-sm font-medium text-base-05 mb-1">
+                    {t('board.fieldType')}
                   </label>
                   <select
                     value={formData.fieldType}
                     onChange={(e) => setFormData(prev => ({ ...prev, fieldType: e.target.value }))}
-                    className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-base-03 dark:border-base-02 rounded focus:outline-none focus:ring-2 focus:ring-base-0D bg-base-07 dark:bg-base-00 text-base-05"
                   >
-                    {FIELD_TYPES.map((type) => (
+                    {getFieldTypes(t).map((type) => (
                       <option key={type.value} value={type.value}>
                         {type.label}
                       </option>
@@ -236,39 +256,41 @@ const CustomFieldManager = ({ boardId, onClose }) => {
 
                 {formData.fieldType === 'DROPDOWN' && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Options
+                    <label className="block text-sm font-medium text-base-05 mb-1">
+                      {t('board.options')}
                     </label>
                     <div className="flex gap-2 mb-2">
                       <input
                         type="text"
                         value={optionInput}
                         onChange={(e) => setOptionInput(e.target.value)}
-                        placeholder="Add option..."
-                        className="flex-1 px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder={t('board.addOptionPlaceholder')}
+                        className="flex-1 px-3 py-2 border border-base-03 dark:border-base-02 rounded focus:outline-none focus:ring-2 focus:ring-base-0D bg-base-07 dark:bg-base-00 text-base-05"
                         onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addOption())}
                       />
                       <button
                         type="button"
                         onClick={addOption}
-                        className="px-3 py-2 bg-gray-200 hover:bg-gray-300 rounded"
+                        className="px-3 py-2 bg-base-01 dark:bg-base-02 hover:bg-base-02 dark:hover:bg-base-03 rounded text-base-05"
                       >
-                        Add
+                        <i className="fas fa-plus mr-1" aria-hidden="true"></i>
+                        {t('board.addOption')}
                       </button>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {formData.options.map((opt, idx) => (
                         <span
                           key={idx}
-                          className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm"
+                          className="inline-flex items-center gap-1 px-2 py-1 bg-base-0D/20 text-base-0D rounded text-sm"
                         >
                           {opt}
                           <button
                             type="button"
                             onClick={() => removeOption(idx)}
-                            className="text-blue-600 hover:text-blue-800"
+                            className="text-base-0D hover:text-base-0D/80"
+                            aria-label={t('common.delete')}
                           >
-                            ×
+                            <i className="fas fa-times" aria-hidden="true"></i>
                           </button>
                         </span>
                       ))}
@@ -282,10 +304,10 @@ const CustomFieldManager = ({ boardId, onClose }) => {
                     id="isRequired"
                     checked={formData.isRequired}
                     onChange={(e) => setFormData(prev => ({ ...prev, isRequired: e.target.checked }))}
-                    className="rounded border-gray-300"
+                    className="rounded border-base-03 dark:border-base-02 text-base-0D"
                   />
-                  <label htmlFor="isRequired" className="text-sm text-gray-700">
-                    Required field
+                  <label htmlFor="isRequired" className="text-sm text-base-05">
+                    {t('board.requiredField')}
                   </label>
                 </div>
 
@@ -295,10 +317,10 @@ const CustomFieldManager = ({ boardId, onClose }) => {
                     id="showInCard"
                     checked={formData.showInCard}
                     onChange={(e) => setFormData(prev => ({ ...prev, showInCard: e.target.checked }))}
-                    className="rounded border-gray-300"
+                    className="rounded border-base-03 dark:border-base-02 text-base-0D"
                   />
-                  <label htmlFor="showInCard" className="text-sm text-gray-700">
-                    Show in task card (max 3)
+                  <label htmlFor="showInCard" className="text-sm text-base-05">
+                    {t('board.showInTaskCard')}
                   </label>
                 </div>
 
@@ -306,15 +328,17 @@ const CustomFieldManager = ({ boardId, onClose }) => {
                   <button
                     type="button"
                     onClick={resetForm}
-                    className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                    className="px-4 py-2 text-base-05 hover:text-base-05 hover:bg-base-01 dark:hover:bg-base-02 rounded"
                   >
-                    Cancel
+                    <i className="fas fa-times mr-2" aria-hidden="true"></i>
+                    {t('common.cancel')}
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                    className="px-4 py-2 bg-base-0D text-base-07 rounded hover:bg-base-0D/90"
                   >
-                    {editingId ? 'Save Changes' : 'Add Field'}
+                    <i className={`fas fa-${editingId ? 'save' : 'plus'} mr-2`} aria-hidden="true"></i>
+                    {editingId ? t('board.saveChanges') : t('board.addField')}
                   </button>
                 </div>
               </div>
@@ -322,9 +346,10 @@ const CustomFieldManager = ({ boardId, onClose }) => {
           ) : (
             <button
               onClick={() => setIsAdding(true)}
-              className="w-full py-2 border-2 border-dashed border-gray-300 text-gray-500 rounded hover:border-blue-400 hover:text-blue-600 transition-colors"
+              className="w-full py-2 border-2 border-dashed border-base-03 dark:border-base-02 text-base-04 rounded hover:border-base-0D hover:text-base-0D transition-colors"
             >
-              + Add Custom Field
+              <i className="fas fa-plus mr-2" aria-hidden="true"></i>
+              {t('board.addCustomField')}
             </button>
           )}
         </div>

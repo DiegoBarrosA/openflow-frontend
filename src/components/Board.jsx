@@ -7,11 +7,15 @@ import CustomFields from './CustomFields';
 import NotificationBell from './NotificationBell';
 import SubscribeButton from './SubscribeButton';
 import { useAuth, ROLES } from '../contexts/AuthContext';
+import { useTranslation } from '../contexts/I18nContext';
+import LanguageSwitcher from './LanguageSwitcher';
+import ThemeSwitcher from './ThemeSwitcher';
 
 function Board() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { isAdmin, getUsername, getRole, logout } = useAuth();
+  const t = useTranslation();
   const [board, setBoard] = useState(null);
   const [statuses, setStatuses] = useState([]);
   const [tasks, setTasks] = useState([]);
@@ -116,7 +120,7 @@ function Board() {
   };
 
   const handleDeleteStatus = async (statusId) => {
-    if (!window.confirm('Are you sure? This will delete all tasks in this status.')) {
+    if (!window.confirm(t('board.deleteStatusConfirm'))) {
       return;
     }
     try {
@@ -344,41 +348,50 @@ function Board() {
 
   if (!board) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F5F5F5]" role="status" aria-live="polite">
-        <div className="text-gray-600 text-base sm:text-lg">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-base-00" role="status" aria-live="polite">
+        <div className="text-base-05 text-base sm:text-lg">
+          <i className="fas fa-spinner fa-spin mr-2" aria-hidden="true"></i>
+          {t('common.loading')}
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#F5F5F5]">
-      <header className="bg-[#F5F5F5] text-gray-700 container-responsive py-4 sm:py-5">
+    <div className="min-h-screen bg-base-00">
+      <header className="bg-base-00 text-base-05 container-responsive py-4 sm:py-5">
         <div className="max-w-full mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
           <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
             <button
               onClick={() => navigate('/boards')}
-              className="bg-[#88D8C0] hover:bg-[#6FC4A8] px-4 py-2.5 sm:py-2 rounded-md transition-colors shadow-sm text-gray-800 font-medium touch-target text-sm sm:text-base"
-              aria-label="Go back to boards list"
+              className="bg-base-0C hover:bg-base-0C/90 px-4 py-2.5 sm:py-2 rounded-md transition-colors shadow-sm text-base-00 dark:text-base-05 font-medium touch-target text-sm sm:text-base"
+              aria-label={t('common.back')}
             >
-              ← Back
+              <i className="fas fa-arrow-left mr-2" aria-hidden="true"></i>
+              {t('common.back')}
             </button>
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold truncate flex-1 text-[#82AAFF]">{board.name}</h1>
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold truncate flex-1 text-base-0D">{board.name}</h1>
           </div>
           <div className="flex items-center gap-3 sm:gap-4">
             {/* Board badges */}
             {board?.isPublic && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                Public
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-base-0B/20 text-base-0B">
+                <i className="fas fa-globe mr-1" aria-hidden="true"></i>
+                {t('board.public')}
               </span>
             )}
             {board?.isTemplate && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                Template
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-base-0E/20 text-base-0E">
+                <i className="fas fa-copy mr-1" aria-hidden="true"></i>
+                {t('board.template')}
               </span>
             )}
             
             {/* Subscribe to board notifications */}
             <SubscribeButton entityType="BOARD" entityId={parseInt(id)} size="sm" />
+            
+            <LanguageSwitcher />
+            <ThemeSwitcher />
             
             {/* Only show Add Status and Custom Fields buttons for Admins */}
             {isAdmin() && (
@@ -387,36 +400,39 @@ function Board() {
                   onClick={() => setEditLayoutMode(!editLayoutMode)}
                   className={`px-4 py-2.5 sm:py-2 rounded-md transition-colors shadow-sm font-medium touch-target text-sm sm:text-base ${
                     editLayoutMode 
-                      ? 'bg-[#82AAFF] text-white hover:bg-[#6B8FE8]' 
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      ? 'bg-base-0D text-base-07 hover:bg-base-0D/90' 
+                      : 'bg-base-01 dark:bg-base-02 text-base-05 hover:bg-base-02 dark:hover:bg-base-03'
                   }`}
-                  aria-label={editLayoutMode ? 'Exit layout edit mode' : 'Enter layout edit mode'}
-                  title={editLayoutMode ? 'Click to exit layout editing' : 'Click to reorder columns'}
+                  aria-label={editLayoutMode ? t('board.exitLayoutEditMode') : t('board.enterLayoutEditMode')}
+                  title={editLayoutMode ? t('board.clickToExitLayoutEditing') : t('board.clickToReorderColumns')}
                 >
-                  {editLayoutMode ? '✓ Done' : '↔ Reorder'}
+                  <i className={`fas fa-${editLayoutMode ? 'check' : 'arrows-alt'} mr-2`} aria-hidden="true"></i>
+                  {editLayoutMode ? t('board.done') : t('board.reorder')}
                 </button>
                 <button
                   onClick={() => setShowBoardSettings(true)}
-                  className="bg-gray-200 hover:bg-gray-300 px-3 py-2.5 sm:py-2 rounded-md transition-colors shadow-sm text-gray-700 font-medium touch-target text-sm sm:text-base"
-                  aria-label="Board settings"
-                  title="Board settings"
+                  className="bg-base-01 dark:bg-base-02 hover:bg-base-02 dark:hover:bg-base-03 px-3 py-2.5 sm:py-2 rounded-md transition-colors shadow-sm text-base-05 font-medium touch-target text-sm sm:text-base"
+                  aria-label={t('board.boardSettings')}
+                  title={t('board.boardSettings')}
                 >
-                  ⚙
+                  <i className="fas fa-cog" aria-hidden="true"></i>
                 </button>
                 <button
                   onClick={() => setShowCustomFieldManager(true)}
-                  className="bg-[#B19CD9] hover:bg-[#9B86C9] px-4 sm:px-5 py-2.5 sm:py-2 rounded-md transition-colors shadow-sm text-white font-medium touch-target text-sm sm:text-base"
-                  aria-label="Manage custom fields"
+                  className="bg-base-0E hover:bg-base-0E/90 px-4 sm:px-5 py-2.5 sm:py-2 rounded-md transition-colors shadow-sm text-base-07 font-medium touch-target text-sm sm:text-base"
+                  aria-label={t('board.manageCustomFields')}
                 >
-                  ⚙ Fields
+                  <i className="fas fa-tags mr-2" aria-hidden="true"></i>
+                  {t('board.customFields')}
                 </button>
                 <button
                   onClick={() => setShowStatusForm(!showStatusForm)}
-                  className="bg-[#88D8C0] hover:bg-[#6FC4A8] px-5 sm:px-6 py-2.5 sm:py-2 rounded-md transition-colors shadow-sm text-gray-800 font-medium touch-target w-full sm:w-auto text-sm sm:text-base"
-                  aria-label={showStatusForm ? 'Cancel status creation' : 'Add new status'}
+                  className="bg-base-0C hover:bg-base-0C/90 px-5 sm:px-6 py-2.5 sm:py-2 rounded-md transition-colors shadow-sm text-base-00 dark:text-base-05 font-medium touch-target w-full sm:w-auto text-sm sm:text-base"
+                  aria-label={showStatusForm ? t('common.cancel') : t('board.addStatus')}
                   aria-expanded={showStatusForm}
                 >
-                  {showStatusForm ? 'Cancel' : 'Add Status'}
+                  <i className={`fas fa-${showStatusForm ? 'times' : 'plus'} mr-2`} aria-hidden="true"></i>
+                  {showStatusForm ? t('common.cancel') : t('board.addStatus')}
                 </button>
               </>
             )}
@@ -427,35 +443,33 @@ function Board() {
             <div className="relative" ref={menuRef}>
               <button
                 onClick={() => setShowUserMenu(!showUserMenu)}
-                className="flex items-center gap-2 sm:gap-3 px-3 py-2 rounded-md hover:bg-gray-200 transition-colors touch-target"
+                className="flex items-center gap-2 sm:gap-3 px-3 py-2 rounded-md hover:bg-base-01 dark:hover:bg-base-02 transition-colors touch-target"
                 aria-label="User menu"
                 aria-expanded={showUserMenu}
               >
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#88D8C0] flex items-center justify-center text-gray-800 font-semibold text-sm sm:text-base">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-base-0C flex items-center justify-center text-base-00 dark:text-base-05 font-semibold text-sm sm:text-base">
                   {username?.charAt(0).toUpperCase() || 'U'}
                 </div>
-                <span className="text-gray-700 text-sm sm:text-base font-medium hidden sm:block">
+                <span className="text-base-05 text-sm sm:text-base font-medium hidden sm:block">
                   {username}
                 </span>
-                <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
+                <i className={`fas fa-chevron-${showUserMenu ? 'up' : 'down'} text-base-04`} aria-hidden="true"></i>
               </button>
               {showUserMenu && (
-                <div className="absolute right-0 mt-2 w-48 sm:w-56 bg-white rounded-md shadow-lg border border-gray-200 py-2 z-50">
-                  <div className="px-4 py-3 border-b border-gray-100">
+                <div className="absolute right-0 mt-2 w-48 sm:w-56 bg-base-07 dark:bg-base-01 rounded-md shadow-lg border border-base-02 dark:border-base-03 py-2 z-50">
+                  <div className="px-4 py-3 border-b border-base-02 dark:border-base-03">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-[#88D8C0] flex items-center justify-center text-gray-800 font-semibold">
+                      <div className="w-10 h-10 rounded-full bg-base-0C flex items-center justify-center text-base-00 dark:text-base-05 font-semibold">
                         {username?.charAt(0).toUpperCase() || 'U'}
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-800">{username}</p>
+                        <p className="text-sm font-medium text-base-05">{username}</p>
                         <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
                           role === ROLES.ADMIN 
-                            ? 'bg-purple-100 text-purple-800' 
-                            : 'bg-blue-100 text-blue-800'
+                            ? 'bg-base-0E/20 text-base-0E' 
+                            : 'bg-base-0D/20 text-base-0D'
                         }`}>
-                          {role === ROLES.ADMIN ? 'Admin' : 'User'}
+                          {role === ROLES.ADMIN ? t('board.admin') : t('board.user')}
                         </span>
                       </div>
                     </div>
@@ -465,10 +479,11 @@ function Board() {
                       logout();
                       navigate('/login');
                     }}
-                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
-                    aria-label="Logout from application"
+                    className="w-full text-left px-4 py-2 text-sm text-base-05 hover:bg-base-01 dark:hover:bg-base-02 transition-colors"
+                    aria-label={t('common.logout')}
                   >
-                    Logout
+                    <i className="fas fa-sign-out-alt mr-2" aria-hidden="true"></i>
+                    {t('common.logout')}
                   </button>
                 </div>
               )}
@@ -479,41 +494,44 @@ function Board() {
 
       {/* Only show status form for Admins */}
       {isAdmin() && showStatusForm && (
-        <div className="bg-white p-5 sm:p-6 mx-4 sm:mx-6 mt-4 sm:mt-6 rounded-lg shadow-sm border border-gray-200">
-          <form onSubmit={handleCreateStatus} className="space-y-4" aria-label="Create status form">
+        <div className="bg-base-07 dark:bg-base-01 p-5 sm:p-6 mx-4 sm:mx-6 mt-4 sm:mt-6 rounded-lg shadow-sm border border-base-02 dark:border-base-03">
+          <form onSubmit={handleCreateStatus} className="space-y-4" aria-label={t('board.createStatus')}>
             <div>
-              <label htmlFor="status-name" className="block text-sm sm:text-base font-medium text-gray-600 mb-1">
-                Status Name
+              <label htmlFor="status-name" className="block text-sm sm:text-base font-medium text-base-05 mb-1">
+                <i className="fas fa-tag mr-2" aria-hidden="true"></i>
+                {t('board.statusName')}
               </label>
               <input
                 id="status-name"
                 type="text"
                 value={newStatusName}
                 onChange={(e) => setNewStatusName(e.target.value)}
-                className="w-full px-4 py-3 sm:py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#82AAFF] focus:border-transparent text-base touch-target"
+                className="w-full px-4 py-3 sm:py-2.5 border border-base-03 dark:border-base-02 rounded-md focus:outline-none focus:ring-2 focus:ring-base-0D focus:border-transparent text-base touch-target bg-base-07 dark:bg-base-00 text-base-05"
                 required
                 aria-required="true"
               />
             </div>
             <div>
-              <label htmlFor="status-color" className="block text-sm sm:text-base font-medium text-gray-600 mb-1">
-                Color
+              <label htmlFor="status-color" className="block text-sm sm:text-base font-medium text-base-05 mb-1">
+                <i className="fas fa-palette mr-2" aria-hidden="true"></i>
+                {t('board.statusColor')}
               </label>
               <input
                 id="status-color"
                 type="color"
                 value={newStatusColor}
                 onChange={(e) => setNewStatusColor(e.target.value)}
-                className="h-12 sm:h-10 w-24 sm:w-20 rounded border-2 border-[#B19CD9] cursor-pointer touch-target"
-                aria-label="Select status color"
+                className="h-12 sm:h-10 w-24 sm:w-20 rounded border-2 border-base-0E cursor-pointer touch-target"
+                aria-label={t('board.statusColor')}
               />
             </div>
             <button
               type="submit"
-              className="bg-[#82AAFF] text-white px-5 sm:px-6 py-2.5 sm:py-2 rounded-md hover:bg-[#6B8FE8] focus:outline-none focus:ring-2 focus:ring-[#82AAFF] focus:ring-offset-2 transition-colors shadow-md touch-target text-sm sm:text-base font-medium"
-              aria-label="Submit status creation"
+              className="bg-base-0D text-base-07 px-5 sm:px-6 py-2.5 sm:py-2 rounded-md hover:bg-base-0D/90 focus:outline-none focus:ring-2 focus:ring-base-0D focus:ring-offset-2 transition-colors shadow-md touch-target text-sm sm:text-base font-medium"
+              aria-label={t('board.createStatus')}
             >
-              Create Status
+              <i className="fas fa-check mr-2" aria-hidden="true"></i>
+              {t('board.createStatus')}
             </button>
           </form>
         </div>
@@ -521,8 +539,9 @@ function Board() {
 
       <main className="container-responsive py-4 sm:py-6 overflow-x-auto">
         {statuses.length === 0 ? (
-          <div className="text-center py-12 sm:py-20 text-gray-600" role="status" aria-live="polite">
-            <p className="text-base sm:text-lg">No statuses yet. Create one to get started!</p>
+          <div className="text-center py-12 sm:py-20 text-base-04" role="status" aria-live="polite">
+            <i className="fas fa-columns text-4xl mb-4" aria-hidden="true"></i>
+            <p className="text-base sm:text-lg">{t('board.noStatusesYet')}</p>
           </div>
         ) : (
           <div 
@@ -533,14 +552,14 @@ function Board() {
             {statuses.map((status) => (
               <section
                 key={status.id}
-                className={`flex-shrink-0 w-full sm:w-[280px] md:w-[300px] bg-white rounded-lg p-3 sm:p-4 transition-colors border-2 ${
+                className={`flex-shrink-0 w-full sm:w-[280px] md:w-[300px] bg-base-07 dark:bg-base-01 rounded-lg p-3 sm:p-4 transition-colors border-2 ${
                   dragOverStatusId === status.id
-                    ? 'bg-[#88D8C0]/30 border-dashed border-[#82AAFF] border-2'
+                    ? 'bg-base-0C/30 border-dashed border-base-0D border-2'
                     : dragOverColumnId === status.id
-                    ? 'bg-[#B19CD9]/20 border-dashed border-[#B19CD9] border-2'
+                    ? 'bg-base-0E/20 border-dashed border-base-0E border-2'
                     : editLayoutMode && isAdmin()
-                    ? 'border-dashed border-[#82AAFF]/50'
-                    : 'border-[#B19CD9]/30'
+                    ? 'border-dashed border-base-0D/50'
+                    : 'border-base-0E/30'
                 } ${draggedColumnId === status.id ? 'opacity-50' : ''}`}
                 draggable={isAdmin() && editLayoutMode}
                 onDragStart={(e) => isAdmin() && editLayoutMode && handleColumnDragStart(e, status.id)}
@@ -567,36 +586,36 @@ function Board() {
                   }
                 }}
                 role="listitem"
-                aria-label={`Status column: ${status.name}`}
+                aria-label={`${t('board.statusColumn')}: ${status.name}`}
               >
                 <div
-                  className={`flex justify-between items-center p-3 bg-white rounded mb-3 border-t-4 shadow-sm ${isAdmin() && editLayoutMode ? 'cursor-grab active:cursor-grabbing' : ''}`}
+                  className={`flex justify-between items-center p-3 bg-base-07 dark:bg-base-01 rounded mb-3 border-t-4 shadow-sm ${isAdmin() && editLayoutMode ? 'cursor-grab active:cursor-grabbing' : ''}`}
                   style={{ borderTopColor: status.color || '#82AAFF' }}
                 >
-                  <h3 className="font-semibold text-gray-700 text-sm sm:text-base flex-1">{status.name}</h3>
+                  <h3 className="font-semibold text-base-05 text-sm sm:text-base flex-1">{status.name}</h3>
                   {/* Only show edit/delete buttons for Admins */}
                   {isAdmin() && (
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => handleEditStatusClick(status)}
-                        className="text-gray-400 hover:text-[#82AAFF] text-sm leading-none w-7 h-7 flex items-center justify-center hover:bg-blue-50 rounded transition-all"
-                        aria-label={`Edit status: ${status.name}`}
-                        title="Edit status"
+                        className="text-base-04 hover:text-base-0D text-sm leading-none w-7 h-7 flex items-center justify-center hover:bg-base-0D/10 rounded transition-all"
+                        aria-label={`${t('board.editStatus')}: ${status.name}`}
+                        title={t('board.editStatus')}
                       >
-                        ✎
+                        <i className="fas fa-edit" aria-hidden="true"></i>
                       </button>
                       <button
                         onClick={() => handleDeleteStatus(status.id)}
-                        className="text-gray-400 hover:text-red-600 text-xl sm:text-2xl leading-none w-7 h-7 flex items-center justify-center hover:bg-red-50 rounded transition-all"
-                        aria-label={`Delete status: ${status.name}`}
-                        title="Delete status"
+                        className="text-base-04 hover:text-base-08 text-xl sm:text-2xl leading-none w-7 h-7 flex items-center justify-center hover:bg-base-08/10 rounded transition-all"
+                        aria-label={`${t('board.deleteStatus')}: ${status.name}`}
+                        title={t('board.deleteStatus')}
                       >
-                        ×
+                        <i className="fas fa-times" aria-hidden="true"></i>
                       </button>
                     </div>
                   )}
                 </div>
-                <div className="min-h-[50px] space-y-2" role="list" aria-label={`Tasks in ${status.name}`}>
+                <div className="min-h-[50px] space-y-2" role="list" aria-label={`${t('board.tasksIn')} ${status.name}`}>
                   {getTasksByStatus(status.id).map((task) => (
                     <Task
                       key={task.id}
@@ -614,10 +633,11 @@ function Board() {
                     setSelectedStatusId(status.id);
                     setShowTaskForm(true);
                   }}
-                  className="w-full mt-3 py-2.5 sm:py-2 bg-[#88D8C0] hover:bg-[#6FC4A8] rounded-md text-gray-800 text-sm sm:text-base transition-colors shadow-sm font-medium touch-target"
-                  aria-label={`Add task to ${status.name}`}
+                  className="w-full mt-3 py-2.5 sm:py-2 bg-base-0C hover:bg-base-0C/90 rounded-md text-base-00 dark:text-base-05 text-sm sm:text-base transition-colors shadow-sm font-medium touch-target"
+                  aria-label={`${t('board.addTaskTo')} ${status.name}`}
                 >
-                  + Add Task
+                  <i className="fas fa-plus mr-2" aria-hidden="true"></i>
+                  {t('board.addTask')}
                 </button>
               </section>
             ))}
@@ -627,42 +647,47 @@ function Board() {
 
       {showTaskForm && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
           onClick={() => setShowTaskForm(false)}
           role="dialog"
           aria-modal="true"
           aria-labelledby="task-form-title"
         >
           <div
-            className="bg-white p-6 sm:p-8 rounded-lg w-full max-w-md shadow-lg border border-gray-200 max-h-[90vh] overflow-y-auto"
+            className="bg-base-07 dark:bg-base-01 p-6 sm:p-8 rounded-lg w-full max-w-md shadow-lg border border-base-02 dark:border-base-03 max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 id="task-form-title" className="text-xl sm:text-2xl font-bold mb-6 text-gray-700">Create Task</h2>
-            <form onSubmit={handleCreateTask} className="space-y-4" aria-label="Create task form">
+            <h2 id="task-form-title" className="text-xl sm:text-2xl font-bold mb-6 text-base-05">
+              <i className="fas fa-plus-circle mr-2" aria-hidden="true"></i>
+              {t('board.createTask')}
+            </h2>
+            <form onSubmit={handleCreateTask} className="space-y-4" aria-label={t('board.createTask')}>
               <div>
-                <label htmlFor="task-title" className="block text-sm sm:text-base font-medium text-gray-600 mb-1">
-                  Title
+                <label htmlFor="task-title" className="block text-sm sm:text-base font-medium text-base-05 mb-1">
+                  <i className="fas fa-heading mr-2" aria-hidden="true"></i>
+                  {t('task.title')}
                 </label>
                 <input
                   id="task-title"
                   type="text"
                   value={newTaskTitle}
                   onChange={(e) => setNewTaskTitle(e.target.value)}
-                  className="w-full px-4 py-3 sm:py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#82AAFF] focus:border-transparent text-base touch-target"
+                  className="w-full px-4 py-3 sm:py-2.5 border border-base-03 dark:border-base-02 rounded-md focus:outline-none focus:ring-2 focus:ring-base-0D focus:border-transparent text-base touch-target bg-base-07 dark:bg-base-00 text-base-05"
                   required
                   aria-required="true"
                 />
               </div>
               <div>
-                <label htmlFor="task-description" className="block text-sm sm:text-base font-medium text-gray-600 mb-1">
-                  Description
+                <label htmlFor="task-description" className="block text-sm sm:text-base font-medium text-base-05 mb-1">
+                  <i className="fas fa-align-left mr-2" aria-hidden="true"></i>
+                  {t('task.description')}
                 </label>
                 <textarea
                   id="task-description"
                   value={newTaskDescription}
                   onChange={(e) => setNewTaskDescription(e.target.value)}
-                  className="w-full px-4 py-3 sm:py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#82AAFF] focus:border-transparent min-h-[80px] resize-y text-base"
-                  aria-label="Task description"
+                  className="w-full px-4 py-3 sm:py-2.5 border border-base-03 dark:border-base-02 rounded-md focus:outline-none focus:ring-2 focus:ring-base-0D focus:border-transparent min-h-[80px] resize-y text-base bg-base-07 dark:bg-base-00 text-base-05"
+                  aria-label={t('task.description')}
                 />
               </div>
               
@@ -678,10 +703,11 @@ function Board() {
               <div className="flex flex-col sm:flex-row gap-3 justify-end">
                 <button
                   type="submit"
-                  className="bg-[#82AAFF] text-white px-5 sm:px-6 py-2.5 sm:py-2 rounded-md hover:bg-[#6B8FE8] focus:outline-none focus:ring-2 focus:ring-[#82AAFF] focus:ring-offset-2 transition-colors shadow-md touch-target text-sm sm:text-base font-medium w-full sm:w-auto"
-                  aria-label="Submit task creation"
+                  className="bg-base-0D text-base-07 px-5 sm:px-6 py-2.5 sm:py-2 rounded-md hover:bg-base-0D/90 focus:outline-none focus:ring-2 focus:ring-base-0D focus:ring-offset-2 transition-colors shadow-md touch-target text-sm sm:text-base font-medium w-full sm:w-auto"
+                  aria-label={t('board.createTask')}
                 >
-                  Create
+                  <i className="fas fa-check mr-2" aria-hidden="true"></i>
+                  {t('common.create')}
                 </button>
                 <button
                   type="button"
@@ -690,10 +716,11 @@ function Board() {
                     setSelectedStatusId(null);
                     setNewTaskCustomFields({});
                   }}
-                  className="bg-gray-500 text-white px-5 sm:px-6 py-2.5 sm:py-2 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors touch-target text-sm sm:text-base font-medium w-full sm:w-auto"
-                  aria-label="Cancel task creation"
+                  className="bg-base-08 hover:bg-base-08/90 text-base-07 px-5 sm:px-6 py-2.5 sm:py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-base-08 focus:ring-offset-2 transition-colors touch-target text-sm sm:text-base font-medium w-full sm:w-auto"
+                  aria-label={t('common.cancel')}
                 >
-                  Cancel
+                  <i className="fas fa-times mr-2" aria-hidden="true"></i>
+                  {t('common.cancel')}
                 </button>
               </div>
             </form>
@@ -712,60 +739,69 @@ function Board() {
       {/* Board Settings Modal */}
       {showBoardSettings && board && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
           onClick={() => setShowBoardSettings(false)}
           role="dialog"
           aria-modal="true"
           aria-labelledby="board-settings-title"
         >
           <div
-            className="bg-white p-6 sm:p-8 rounded-lg w-full max-w-md shadow-lg border border-gray-200"
+            className="bg-base-07 dark:bg-base-01 p-6 sm:p-8 rounded-lg w-full max-w-md shadow-lg border border-base-02 dark:border-base-03"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 id="board-settings-title" className="text-xl sm:text-2xl font-bold mb-6 text-gray-700">Board Settings</h2>
+            <h2 id="board-settings-title" className="text-xl sm:text-2xl font-bold mb-6 text-base-05">
+              <i className="fas fa-cog mr-2" aria-hidden="true"></i>
+              {t('board.boardSettings')}
+            </h2>
             <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+              <div className="flex items-center justify-between p-4 bg-base-01 dark:bg-base-02 rounded-lg">
                 <div>
-                  <h3 className="font-medium text-gray-700">Public Board</h3>
-                  <p className="text-sm text-gray-500">
+                  <h3 className="font-medium text-base-05">
+                    <i className="fas fa-globe mr-2" aria-hidden="true"></i>
+                    {t('board.publicBoard')}
+                  </h3>
+                  <p className="text-sm text-base-04">
                     {board.isPublic 
-                      ? 'This board is visible to everyone' 
-                      : 'Only you can see this board'}
+                      ? t('board.thisBoardIsVisibleToEveryone')
+                      : t('board.onlyYouCanSeeThisBoard')}
                   </p>
                 </div>
                 <button
                   onClick={handleToggleBoardVisibility}
                   className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                    board.isPublic ? 'bg-[#82AAFF]' : 'bg-gray-300'
+                    board.isPublic ? 'bg-base-0D' : 'bg-base-03'
                   }`}
-                  aria-label={board.isPublic ? 'Make board private' : 'Make board public'}
+                  aria-label={board.isPublic ? t('board.makeBoardPrivate') : t('board.makeBoardPublic')}
                 >
                   <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    className={`inline-block h-4 w-4 transform rounded-full bg-base-07 transition-transform ${
                       board.isPublic ? 'translate-x-6' : 'translate-x-1'
                     }`}
                   />
                 </button>
               </div>
               
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+              <div className="flex items-center justify-between p-4 bg-base-01 dark:bg-base-02 rounded-lg">
                 <div>
-                  <h3 className="font-medium text-gray-700">Template</h3>
-                  <p className="text-sm text-gray-500">
+                  <h3 className="font-medium text-base-05">
+                    <i className="fas fa-copy mr-2" aria-hidden="true"></i>
+                    {t('board.template')}
+                  </h3>
+                  <p className="text-sm text-base-04">
                     {board.isTemplate 
-                      ? 'This board can be used as a template' 
-                      : 'Mark as template to reuse structure'}
+                      ? t('board.thisBoardCanBeUsedAsTemplate')
+                      : t('board.markAsTemplateToReuseStructure')}
                   </p>
                 </div>
                 <button
                   onClick={handleToggleBoardTemplate}
                   className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                    board.isTemplate ? 'bg-[#B19CD9]' : 'bg-gray-300'
+                    board.isTemplate ? 'bg-base-0E' : 'bg-base-03'
                   }`}
-                  aria-label={board.isTemplate ? 'Unmark as template' : 'Mark as template'}
+                  aria-label={board.isTemplate ? t('board.unmarkAsTemplate') : t('board.markAsTemplate')}
                 >
                   <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    className={`inline-block h-4 w-4 transform rounded-full bg-base-07 transition-transform ${
                       board.isTemplate ? 'translate-x-6' : 'translate-x-1'
                     }`}
                   />
@@ -775,9 +811,10 @@ function Board() {
               <div className="pt-4 flex justify-end">
                 <button
                   onClick={() => setShowBoardSettings(false)}
-                  className="bg-gray-500 text-white px-5 sm:px-6 py-2.5 sm:py-2 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors text-sm sm:text-base font-medium"
+                  className="bg-base-08 hover:bg-base-08/90 text-base-07 px-5 sm:px-6 py-2.5 sm:py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-base-08 focus:ring-offset-2 transition-colors text-sm sm:text-base font-medium"
                 >
-                  Close
+                  <i className="fas fa-times mr-2" aria-hidden="true"></i>
+                  {t('common.close')}
                 </button>
               </div>
             </div>
@@ -788,34 +825,39 @@ function Board() {
       {/* Edit Status Modal */}
       {editingStatus && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
           onClick={() => setEditingStatus(null)}
           role="dialog"
           aria-modal="true"
           aria-labelledby="edit-status-title"
         >
           <div
-            className="bg-white p-6 sm:p-8 rounded-lg w-full max-w-md shadow-lg border border-gray-200"
+            className="bg-base-07 dark:bg-base-01 p-6 sm:p-8 rounded-lg w-full max-w-md shadow-lg border border-base-02 dark:border-base-03"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 id="edit-status-title" className="text-xl sm:text-2xl font-bold mb-6 text-gray-700">Edit Status</h2>
-            <form onSubmit={handleUpdateStatus} className="space-y-4" aria-label="Edit status form">
+            <h2 id="edit-status-title" className="text-xl sm:text-2xl font-bold mb-6 text-base-05">
+              <i className="fas fa-edit mr-2" aria-hidden="true"></i>
+              {t('board.editStatus')}
+            </h2>
+            <form onSubmit={handleUpdateStatus} className="space-y-4" aria-label={t('board.editStatus')}>
               <div>
-                <label htmlFor="edit-status-name" className="block text-sm sm:text-base font-medium text-gray-600 mb-1">
-                  Status Name
+                <label htmlFor="edit-status-name" className="block text-sm sm:text-base font-medium text-base-05 mb-1">
+                  <i className="fas fa-tag mr-2" aria-hidden="true"></i>
+                  {t('board.statusName')}
                 </label>
                 <input
                   id="edit-status-name"
                   type="text"
                   value={editStatusName}
                   onChange={(e) => setEditStatusName(e.target.value)}
-                  className="w-full px-4 py-3 sm:py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#82AAFF] focus:border-transparent text-base"
+                  className="w-full px-4 py-3 sm:py-2.5 border border-base-03 dark:border-base-02 rounded-md focus:outline-none focus:ring-2 focus:ring-base-0D focus:border-transparent text-base bg-base-07 dark:bg-base-00 text-base-05"
                   required
                 />
               </div>
               <div>
-                <label htmlFor="edit-status-color" className="block text-sm sm:text-base font-medium text-gray-600 mb-1">
-                  Color
+                <label htmlFor="edit-status-color" className="block text-sm sm:text-base font-medium text-base-05 mb-1">
+                  <i className="fas fa-palette mr-2" aria-hidden="true"></i>
+                  {t('board.statusColor')}
                 </label>
                 <div className="flex items-center gap-3">
                   <input
@@ -823,24 +865,26 @@ function Board() {
                     type="color"
                     value={editStatusColor}
                     onChange={(e) => setEditStatusColor(e.target.value)}
-                    className="h-12 sm:h-10 w-24 sm:w-20 rounded border-2 border-[#B19CD9] cursor-pointer"
+                    className="h-12 sm:h-10 w-24 sm:w-20 rounded border-2 border-base-0E cursor-pointer"
                   />
-                  <span className="text-sm text-gray-500">{editStatusColor}</span>
+                  <span className="text-sm text-base-04">{editStatusColor}</span>
                 </div>
               </div>
               <div className="flex flex-col sm:flex-row gap-3 justify-end pt-2">
                 <button
                   type="submit"
-                  className="bg-[#82AAFF] text-white px-5 sm:px-6 py-2.5 sm:py-2 rounded-md hover:bg-[#6B8FE8] focus:outline-none focus:ring-2 focus:ring-[#82AAFF] focus:ring-offset-2 transition-colors shadow-md text-sm sm:text-base font-medium w-full sm:w-auto"
+                  className="bg-base-0D text-base-07 px-5 sm:px-6 py-2.5 sm:py-2 rounded-md hover:bg-base-0D/90 focus:outline-none focus:ring-2 focus:ring-base-0D focus:ring-offset-2 transition-colors shadow-md text-sm sm:text-base font-medium w-full sm:w-auto"
                 >
-                  Save Changes
+                  <i className="fas fa-save mr-2" aria-hidden="true"></i>
+                  {t('board.saveChanges')}
                 </button>
                 <button
                   type="button"
                   onClick={() => setEditingStatus(null)}
-                  className="bg-gray-500 text-white px-5 sm:px-6 py-2.5 sm:py-2 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors text-sm sm:text-base font-medium w-full sm:w-auto"
+                  className="bg-base-08 hover:bg-base-08/90 text-base-07 px-5 sm:px-6 py-2.5 sm:py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-base-08 focus:ring-offset-2 transition-colors text-sm sm:text-base font-medium w-full sm:w-auto"
                 >
-                  Cancel
+                  <i className="fas fa-times mr-2" aria-hidden="true"></i>
+                  {t('common.cancel')}
                 </button>
               </div>
             </form>
