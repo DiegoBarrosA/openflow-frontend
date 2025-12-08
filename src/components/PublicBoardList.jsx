@@ -3,8 +3,6 @@ import { useNavigate, Link } from 'react-router-dom';
 import { getPublicBoards } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from '../contexts/I18nContext';
-import LanguageSwitcher from './LanguageSwitcher';
-import ThemeSwitcher from './ThemeSwitcher';
 
 /**
  * Public board list - viewable without authentication.
@@ -15,9 +13,8 @@ function PublicBoardList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
-  const { isAuthenticated, getUsername } = useAuth();
+  const { isAuthenticated } = useAuth();
   const t = useTranslation();
-  const username = getUsername();
 
   useEffect(() => {
     fetchPublicBoards();
@@ -39,55 +36,6 @@ function PublicBoardList() {
 
   return (
     <div className="min-h-screen bg-base-00">
-      <header className="bg-base-00 text-base-05 container-responsive py-4 sm:py-5">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-base-0D">
-            <i className="fas fa-project-diagram mr-2" aria-hidden="true"></i>
-            OpenFlow
-          </h1>
-          <div className="flex gap-3 items-center">
-            <LanguageSwitcher />
-            <ThemeSwitcher />
-            {isAuthenticated() ? (
-              <>
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-base-0C flex items-center justify-center text-base-00 dark:text-base-05 font-semibold text-sm">
-                    {username?.charAt(0).toUpperCase() || 'U'}
-                  </div>
-                  <span className="text-base-05 text-sm font-medium hidden sm:block">
-                    {username}
-                  </span>
-                </div>
-                <Link
-                  to="/boards"
-                  className="bg-base-0D text-base-07 px-4 py-2 rounded-md hover:bg-base-0D/90 transition-colors text-sm font-medium"
-                >
-                  <i className="fas fa-th-large mr-2" aria-hidden="true"></i>
-                  {t('board.myBoards')}
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link
-                  to="/login"
-                  className="bg-base-0D text-base-07 px-4 py-2 rounded-md hover:bg-base-0D/90 transition-colors text-sm font-medium"
-                >
-                  <i className="fas fa-sign-in-alt mr-2" aria-hidden="true"></i>
-                  {t('board.signIn')}
-                </Link>
-                <Link
-                  to="/register"
-                  className="bg-base-01 dark:bg-base-02 text-base-05 px-4 py-2 rounded-md hover:bg-base-02 dark:hover:bg-base-03 transition-colors text-sm font-medium"
-                >
-                  <i className="fas fa-user-plus mr-2" aria-hidden="true"></i>
-                  {t('common.register')}
-                </Link>
-              </>
-            )}
-          </div>
-        </div>
-      </header>
-
       <main className="max-w-7xl mx-auto container-responsive py-6 sm:py-8">
         <div className="mb-6">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-base-05">

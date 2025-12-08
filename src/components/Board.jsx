@@ -4,18 +4,16 @@ import api, { updateStatus, reorderStatuses, updateBoard } from '../services/api
 import Task from './Task';
 import CustomFieldManager from './CustomFieldManager';
 import CustomFields from './CustomFields';
-import NotificationBell from './NotificationBell';
-import SubscribeButton from './SubscribeButton';
 import { useAuth, ROLES } from '../contexts/AuthContext';
 import { useTranslation } from '../contexts/I18nContext';
-import LanguageSwitcher from './LanguageSwitcher';
-import ThemeSwitcher from './ThemeSwitcher';
+import { useBoardActions } from '../contexts/BoardActionsContext';
 
 function Board() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { isAdmin, getUsername, getRole, logout } = useAuth();
+  const { isAdmin } = useAuth();
   const t = useTranslation();
+  const { setBoardActions } = useBoardActions();
   const [board, setBoard] = useState(null);
   const [statuses, setStatuses] = useState([]);
   const [tasks, setTasks] = useState([]);
@@ -29,7 +27,6 @@ function Board() {
   const [newTaskCustomFields, setNewTaskCustomFields] = useState({});
   const [draggedTaskId, setDraggedTaskId] = useState(null);
   const [dragOverStatusId, setDragOverStatusId] = useState(null);
-  const [showUserMenu, setShowUserMenu] = useState(false);
   const [showCustomFieldManager, setShowCustomFieldManager] = useState(false);
   
   // Status editing state
@@ -46,11 +43,6 @@ function Board() {
   
   // Edit layout mode - when true, columns are draggable; when false, tasks are draggable
   const [editLayoutMode, setEditLayoutMode] = useState(false);
-  
-  const menuRef = useRef(null);
-  
-  const username = getUsername();
-  const role = getRole();
 
   useEffect(() => {
     fetchBoard();
@@ -58,21 +50,59 @@ function Board() {
     fetchTasks();
   }, [id]);
 
+  // Set board actions for NavigationBar
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
-        setShowUserMenu(false);
-      }
-    };
-
-    if (showUserMenu) {
-      document.addEventListener('mousedown', handleClickOutside);
+    if (board && isAdmin()) {
+      setBoardActions(
+        <>
+          <button
+            onClick={() => setEditLayoutMode(!editLayoutMode)}
+            className={`px-4 py-2.5 sm:py-2 rounded-md transition-colors shadow-sm font-medium touch-target text-sm sm:text-base ${
+              editLayoutMode 
+                ? 'bg-base-0D text-base-07 hover:bg-base-0D/90' 
+                : 'bg-base-01 dark:bg-base-02 text-base-05 hover:bg-base-02 dark:hover:bg-base-03'
+            }`}
+            aria-label={editLayoutMode ? t('board.exitLayoutEditMode') : t('board.enterLayoutEditMode')}
+            title={editLayoutMode ? t('board.clickToExitLayoutEditing') : t('board.clickToReorderColumns')}
+          >
+            <i className={`fas fa-${editLayoutMode ? 'check' : 'arrows-alt'} mr-2`} aria-hidden="true"></i>
+            {editLayoutMode ? t('board.done') : t('board.reorder')}
+          </button>
+          <button
+            onClick={() => setShowBoardSettings(true)}
+            className="bg-base-01 dark:bg-base-02 hover:bg-base-02 dark:hover:bg-base-03 px-3 py-2.5 sm:py-2 rounded-md transition-colors shadow-sm text-base-05 font-medium touch-target text-sm sm:text-base"
+            aria-label={t('board.boardSettings')}
+            title={t('board.boardSettings')}
+          >
+            <i className="fas fa-cog" aria-hidden="true"></i>
+          </button>
+          <button
+            onClick={() => setShowCustomFieldManager(true)}
+            className="bg-base-0E hover:bg-base-0E/90 px-4 sm:px-5 py-2.5 sm:py-2 rounded-md transition-colors shadow-sm text-base-07 font-medium touch-target text-sm sm:text-base"
+            aria-label={t('board.manageCustomFields')}
+          >
+            <i className="fas fa-tags mr-2" aria-hidden="true"></i>
+            {t('board.customFields')}
+          </button>
+          <button
+            onClick={() => setShowStatusForm(!showStatusForm)}
+            className="bg-base-0C hover:bg-base-0C/90 px-5 sm:px-6 py-2.5 sm:py-2 rounded-md transition-colors shadow-sm text-base-00 dark:text-base-05 font-medium touch-target w-full sm:w-auto text-sm sm:text-base"
+            aria-label={showStatusForm ? t('common.cancel') : t('board.addStatus')}
+            aria-expanded={showStatusForm}
+          >
+            <i className={`fas fa-${showStatusForm ? 'times' : 'plus'} mr-2`} aria-hidden="true"></i>
+            {showStatusForm ? t('common.cancel') : t('board.addStatus')}
+          </button>
+        </>
+      );
+    } else {
+      setBoardActions(null);
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      setBoardActions(null);
     };
-  }, [showUserMenu]);
+  }, [board, editLayoutMode, showStatusForm, setBoardActions, t, isAdmin]);
 
   const fetchBoard = async () => {
     try {
@@ -359,139 +389,6 @@ function Board() {
 
   return (
     <div className="min-h-screen bg-base-00">
-      <header className="bg-base-00 text-base-05 container-responsive py-4 sm:py-5">
-        <div className="max-w-full mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
-          <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
-            <button
-              onClick={() => navigate('/boards')}
-              className="bg-base-0C hover:bg-base-0C/90 px-4 py-2.5 sm:py-2 rounded-md transition-colors shadow-sm text-base-00 dark:text-base-05 font-medium touch-target text-sm sm:text-base"
-              aria-label={t('common.back')}
-            >
-              <i className="fas fa-arrow-left mr-2" aria-hidden="true"></i>
-              {t('common.back')}
-            </button>
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold truncate flex-1 text-base-0D">{board.name}</h1>
-          </div>
-          <div className="flex items-center gap-3 sm:gap-4">
-            {/* Board badges */}
-            {board?.isPublic && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-base-0B/20 text-base-0B">
-                <i className="fas fa-globe mr-1" aria-hidden="true"></i>
-                {t('board.public')}
-              </span>
-            )}
-            {board?.isTemplate && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-base-0E/20 text-base-0E">
-                <i className="fas fa-copy mr-1" aria-hidden="true"></i>
-                {t('board.template')}
-              </span>
-            )}
-            
-            {/* Subscribe to board notifications */}
-            <SubscribeButton entityType="BOARD" entityId={parseInt(id)} size="sm" />
-            
-            <LanguageSwitcher />
-            <ThemeSwitcher />
-            
-            {/* Only show Add Status and Custom Fields buttons for Admins */}
-            {isAdmin() && (
-              <>
-                <button
-                  onClick={() => setEditLayoutMode(!editLayoutMode)}
-                  className={`px-4 py-2.5 sm:py-2 rounded-md transition-colors shadow-sm font-medium touch-target text-sm sm:text-base ${
-                    editLayoutMode 
-                      ? 'bg-base-0D text-base-07 hover:bg-base-0D/90' 
-                      : 'bg-base-01 dark:bg-base-02 text-base-05 hover:bg-base-02 dark:hover:bg-base-03'
-                  }`}
-                  aria-label={editLayoutMode ? t('board.exitLayoutEditMode') : t('board.enterLayoutEditMode')}
-                  title={editLayoutMode ? t('board.clickToExitLayoutEditing') : t('board.clickToReorderColumns')}
-                >
-                  <i className={`fas fa-${editLayoutMode ? 'check' : 'arrows-alt'} mr-2`} aria-hidden="true"></i>
-                  {editLayoutMode ? t('board.done') : t('board.reorder')}
-                </button>
-                <button
-                  onClick={() => setShowBoardSettings(true)}
-                  className="bg-base-01 dark:bg-base-02 hover:bg-base-02 dark:hover:bg-base-03 px-3 py-2.5 sm:py-2 rounded-md transition-colors shadow-sm text-base-05 font-medium touch-target text-sm sm:text-base"
-                  aria-label={t('board.boardSettings')}
-                  title={t('board.boardSettings')}
-                >
-                  <i className="fas fa-cog" aria-hidden="true"></i>
-                </button>
-                <button
-                  onClick={() => setShowCustomFieldManager(true)}
-                  className="bg-base-0E hover:bg-base-0E/90 px-4 sm:px-5 py-2.5 sm:py-2 rounded-md transition-colors shadow-sm text-base-07 font-medium touch-target text-sm sm:text-base"
-                  aria-label={t('board.manageCustomFields')}
-                >
-                  <i className="fas fa-tags mr-2" aria-hidden="true"></i>
-                  {t('board.customFields')}
-                </button>
-                <button
-                  onClick={() => setShowStatusForm(!showStatusForm)}
-                  className="bg-base-0C hover:bg-base-0C/90 px-5 sm:px-6 py-2.5 sm:py-2 rounded-md transition-colors shadow-sm text-base-00 dark:text-base-05 font-medium touch-target w-full sm:w-auto text-sm sm:text-base"
-                  aria-label={showStatusForm ? t('common.cancel') : t('board.addStatus')}
-                  aria-expanded={showStatusForm}
-                >
-                  <i className={`fas fa-${showStatusForm ? 'times' : 'plus'} mr-2`} aria-hidden="true"></i>
-                  {showStatusForm ? t('common.cancel') : t('board.addStatus')}
-                </button>
-              </>
-            )}
-            
-            {/* Notifications */}
-            <NotificationBell />
-            
-            <div className="relative" ref={menuRef}>
-              <button
-                onClick={() => setShowUserMenu(!showUserMenu)}
-                className="flex items-center gap-2 sm:gap-3 px-3 py-2 rounded-md hover:bg-base-01 dark:hover:bg-base-02 transition-colors touch-target"
-                aria-label="User menu"
-                aria-expanded={showUserMenu}
-              >
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-base-0C flex items-center justify-center text-base-00 dark:text-base-05 font-semibold text-sm sm:text-base">
-                  {username?.charAt(0).toUpperCase() || 'U'}
-                </div>
-                <span className="text-base-05 text-sm sm:text-base font-medium hidden sm:block">
-                  {username}
-                </span>
-                <i className={`fas fa-chevron-${showUserMenu ? 'up' : 'down'} text-base-04`} aria-hidden="true"></i>
-              </button>
-              {showUserMenu && (
-                <div className="absolute right-0 mt-2 w-48 sm:w-56 bg-base-07 dark:bg-base-01 rounded-md shadow-lg border border-base-02 dark:border-base-03 py-2 z-50">
-                  <div className="px-4 py-3 border-b border-base-02 dark:border-base-03">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-base-0C flex items-center justify-center text-base-00 dark:text-base-05 font-semibold">
-                        {username?.charAt(0).toUpperCase() || 'U'}
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-base-05">{username}</p>
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                          role === ROLES.ADMIN 
-                            ? 'bg-base-0E/20 text-base-0E' 
-                            : 'bg-base-0D/20 text-base-0D'
-                        }`}>
-                          {role === ROLES.ADMIN ? t('board.admin') : t('board.user')}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => {
-                      logout();
-                      navigate('/login');
-                    }}
-                    className="w-full text-left px-4 py-2 text-sm text-base-05 hover:bg-base-01 dark:hover:bg-base-02 transition-colors"
-                    aria-label={t('common.logout')}
-                  >
-                    <i className="fas fa-sign-out-alt mr-2" aria-hidden="true"></i>
-                    {t('common.logout')}
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
-
       {/* Only show status form for Admins */}
       {isAdmin() && showStatusForm && (
         <div className="bg-base-07 dark:bg-base-01 p-5 sm:p-6 mx-4 sm:mx-6 mt-4 sm:mt-6 rounded-lg shadow-sm border border-base-02 dark:border-base-03">

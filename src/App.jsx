@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { I18nProvider, useI18n } from './contexts/I18nContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { BoardActionsProvider } from './contexts/BoardActionsContext';
+import NavigationBar from './components/NavigationBar';
 import Login from './components/Login';
 import Register from './components/Register';
 import BoardList from './components/BoardList';
@@ -111,9 +113,12 @@ function App() {
         <I18nProvider>
           <LanguageUpdater />
           <AuthProvider>
-            <div className="min-h-screen bg-base-00">
-              <AppRoutes />
-            </div>
+            <BoardActionsProvider>
+              <div className="min-h-screen bg-base-00">
+                <NavigationBar />
+                <AppRoutes />
+              </div>
+            </BoardActionsProvider>
           </AuthProvider>
         </I18nProvider>
       </ThemeProvider>

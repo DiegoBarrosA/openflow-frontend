@@ -3,8 +3,6 @@ import { useNavigate, Link } from 'react-router-dom';
 import api, { azureLogin } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from '../contexts/I18nContext';
-import LanguageSwitcher from './LanguageSwitcher';
-import ThemeSwitcher from './ThemeSwitcher';
 
 function Login() {
   const [username, setUsername] = useState('');
@@ -31,10 +29,6 @@ function Login() {
   return (
     <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-base-0D via-base-0C to-base-0E container-responsive py-8">
       <div className="bg-base-07 dark:bg-base-01 p-6 sm:p-8 md:p-10 rounded-lg shadow-xl w-full max-w-md border border-base-02 dark:border-base-03">
-        <div className="flex justify-end gap-2 mb-4">
-          <LanguageSwitcher />
-          <ThemeSwitcher />
-        </div>
         <h1 className="text-responsive-xl font-bold text-center text-base-0D mb-2" aria-label="OpenFlow Application">
           <i className="fas fa-project-diagram mr-2" aria-hidden="true"></i>
           OpenFlow

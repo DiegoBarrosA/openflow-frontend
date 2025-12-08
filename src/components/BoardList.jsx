@@ -3,24 +3,19 @@ import { useNavigate, Link } from 'react-router-dom';
 import api, { getTemplates, createBoardFromTemplate } from '../services/api';
 import { useAuth, ROLES } from '../contexts/AuthContext';
 import { useTranslation } from '../contexts/I18nContext';
-import NotificationBell from './NotificationBell';
-import LanguageSwitcher from './LanguageSwitcher';
-import ThemeSwitcher from './ThemeSwitcher';
 
 function BoardList() {
   const [boards, setBoards] = useState([]);
   const [templates, setTemplates] = useState([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showTemplateForm, setShowTemplateForm] = useState(false);
-  const [showUserMenu, setShowUserMenu] = useState(false);
   const [newBoardName, setNewBoardName] = useState('');
   const [newBoardDescription, setNewBoardDescription] = useState('');
   const [newBoardIsPublic, setNewBoardIsPublic] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState(null);
   const [templateBoardName, setTemplateBoardName] = useState('');
   const navigate = useNavigate();
-  const menuRef = useRef(null);
-  const { isAdmin, getUsername, getRole, logout } = useAuth();
+  const { isAdmin } = useAuth();
   const t = useTranslation();
 
   useEffect(() => {
@@ -29,22 +24,6 @@ function BoardList() {
       fetchTemplates();
     }
   }, []);
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
-        setShowUserMenu(false);
-      }
-    };
-
-    if (showUserMenu) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [showUserMenu]);
 
   const fetchBoards = async () => {
     try {
@@ -80,7 +59,7 @@ function BoardList() {
       navigate(`/boards/${response.data.id}`);
     } catch (err) {
       console.error('Error creating board:', err);
-    }
+    }OpenFlow
   };
 
   const handleDeleteBoard = async (id) => {
@@ -111,85 +90,8 @@ function BoardList() {
     }
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
-
-  const username = getUsername();
-  const role = getRole();
-
   return (
     <div className="min-h-screen bg-base-00">
-      <header className="bg-base-00 text-base-05 container-responsive py-4 sm:py-5">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-base-0D">
-            <i className="fas fa-project-diagram mr-2" aria-hidden="true"></i>
-            OpenFlow
-          </h1>
-          <div className="flex items-center gap-4">
-            <Link
-              to="/public/boards"
-              className="text-base-04 hover:text-base-0D text-sm font-medium transition-colors"
-            >
-              <i className="fas fa-globe mr-1" aria-hidden="true"></i>
-              {t('board.publicBoards')}
-            </Link>
-            
-            <LanguageSwitcher />
-            <ThemeSwitcher />
-            
-            {/* Notifications */}
-            <NotificationBell />
-            
-            <div className="relative" ref={menuRef}>
-              <button
-                onClick={() => setShowUserMenu(!showUserMenu)}
-                className="flex items-center gap-2 sm:gap-3 px-3 py-2 rounded-md hover:bg-base-01 dark:hover:bg-base-02 transition-colors touch-target"
-                aria-label="User menu"
-                aria-expanded={showUserMenu}
-              >
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-base-0C flex items-center justify-center text-base-00 dark:text-base-05 font-semibold text-sm sm:text-base">
-                  {username?.charAt(0).toUpperCase() || 'U'}
-                </div>
-                <span className="text-base-05 text-sm sm:text-base font-medium hidden sm:block">
-                  {username}
-                </span>
-                <i className={`fas fa-chevron-${showUserMenu ? 'up' : 'down'} text-base-04`} aria-hidden="true"></i>
-              </button>
-              {showUserMenu && (
-                <div className="absolute right-0 mt-2 w-48 sm:w-56 bg-base-07 dark:bg-base-01 rounded-md shadow-lg border border-base-02 dark:border-base-03 py-2 z-50">
-                  <div className="px-4 py-3 border-b border-base-02 dark:border-base-03">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-base-0C flex items-center justify-center text-base-00 dark:text-base-05 font-semibold">
-                        {username?.charAt(0).toUpperCase() || 'U'}
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-base-05">{username}</p>
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                          role === ROLES.ADMIN 
-                            ? 'bg-base-0E/20 text-base-0E' 
-                            : 'bg-base-0D/20 text-base-0D'
-                        }`}>
-                          {role === ROLES.ADMIN ? t('board.admin') : t('board.user')}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <button
-                    onClick={handleLogout}
-                    className="w-full text-left px-4 py-2 text-sm text-base-05 hover:bg-base-01 dark:hover:bg-base-02 transition-colors"
-                    aria-label={t('common.logout')}
-                  >
-                    <i className="fas fa-sign-out-alt mr-2" aria-hidden="true"></i>
-                    {t('common.logout')}
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
       <main className="max-w-7xl mx-auto container-responsive py-6 sm:py-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-base-05">

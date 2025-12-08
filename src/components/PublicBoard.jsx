@@ -3,8 +3,6 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getPublicBoard, getPublicBoardStatuses, getPublicBoardTasks } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from '../contexts/I18nContext';
-import LanguageSwitcher from './LanguageSwitcher';
-import ThemeSwitcher from './ThemeSwitcher';
 
 /**
  * Public board view - read-only, no authentication required.
@@ -12,9 +10,8 @@ import ThemeSwitcher from './ThemeSwitcher';
 function PublicBoard() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { isAuthenticated, getUsername } = useAuth();
+  const { isAuthenticated } = useAuth();
   const t = useTranslation();
-  const username = getUsername();
   const [board, setBoard] = useState(null);
   const [statuses, setStatuses] = useState([]);
   const [tasks, setTasks] = useState([]);
@@ -67,20 +64,6 @@ function PublicBoard() {
   if (error) {
     return (
       <div className="min-h-screen bg-base-00">
-        <header className="bg-base-00 text-base-05 container-responsive py-4 sm:py-5">
-          <div className="max-w-7xl mx-auto flex justify-between items-center">
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-base-0D">
-              <i className="fas fa-project-diagram mr-2" aria-hidden="true"></i>
-              OpenFlow
-            </h1>
-            <Link
-              to="/public/boards"
-              className="text-base-0D hover:text-base-0D/80 font-medium"
-            >
-              {t('board.backToPublicBoards')}
-            </Link>
-          </div>
-        </header>
         <div className="text-center py-12 sm:py-20 text-base-08" role="alert">
           <i className="fas fa-exclamation-circle text-4xl mb-4" aria-hidden="true"></i>
           <p className="text-base sm:text-lg">{error}</p>
@@ -97,61 +80,11 @@ function PublicBoard() {
 
   return (
     <div className="min-h-screen bg-base-00">
-      <header className="bg-base-00 text-base-05 container-responsive py-4 sm:py-5">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => navigate('/public/boards')}
-              className="text-base-0D hover:text-base-0D/80 font-medium flex items-center gap-1"
-              aria-label={t('board.backToPublicBoards')}
-            >
-              <i className="fas fa-arrow-left" aria-hidden="true"></i>
-              {t('common.back')}
-            </button>
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-base-0D">
-              {board?.name}
-            </h1>
-            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-base-0B/20 text-base-0B">
-              <i className="fas fa-lock mr-1" aria-hidden="true"></i>
-              {t('board.publicReadOnly')}
-            </span>
-          </div>
-          <div className="flex gap-3 items-center">
-            <LanguageSwitcher />
-            <ThemeSwitcher />
-            {isAuthenticated() ? (
-              <>
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-base-0C flex items-center justify-center text-base-00 dark:text-base-05 font-semibold text-sm">
-                    {username?.charAt(0).toUpperCase() || 'U'}
-                  </div>
-                  <span className="text-base-05 text-sm font-medium hidden sm:block">
-                    {username}
-                  </span>
-                </div>
-                <Link
-                  to="/boards"
-                  className="bg-base-0D text-base-07 px-4 py-2 rounded-md hover:bg-base-0D/90 transition-colors text-sm font-medium"
-                >
-                  <i className="fas fa-th-large mr-2" aria-hidden="true"></i>
-                  {t('board.myBoards')}
-                </Link>
-              </>
-            ) : (
-              <Link
-                to="/login"
-                className="bg-base-0D text-base-07 px-4 py-2 rounded-md hover:bg-base-0D/90 transition-colors text-sm font-medium"
-              >
-                <i className="fas fa-sign-in-alt mr-2" aria-hidden="true"></i>
-                {t('board.signInToEdit')}
-              </Link>
-            )}
-          </div>
+      {board?.description && (
+        <div className="max-w-7xl mx-auto container-responsive py-2">
+          <p className="text-base-04">{board.description}</p>
         </div>
-        {board?.description && (
-          <p className="max-w-7xl mx-auto text-base-04 mt-2">{board.description}</p>
-        )}
-      </header>
+      )}
 
       <main className="max-w-full mx-auto container-responsive py-6 sm:py-8 overflow-x-auto">
         {statuses.length === 0 ? (
