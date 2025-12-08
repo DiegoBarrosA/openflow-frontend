@@ -417,5 +417,52 @@ export const deleteComment = async (commentId) => {
   await api.delete(`/comments/${commentId}`);
 };
 
+// ==================== Board Access Management ====================
+
+/**
+ * Get all users with access to a board.
+ * @param {number} boardId - Board ID
+ */
+export const getBoardAccess = async (boardId) => {
+  const response = await api.get(`/boards/${boardId}/access`);
+  return response.data;
+};
+
+/**
+ * Grant access to a user.
+ * @param {number} boardId - Board ID
+ * @param {number} userId - User ID
+ * @param {string} accessLevel - Access level: 'READ', 'WRITE', or 'ADMIN'
+ */
+export const grantBoardAccess = async (boardId, userId, accessLevel) => {
+  const response = await api.post(`/boards/${boardId}/access`, {
+    userId,
+    accessLevel,
+  });
+  return response.data;
+};
+
+/**
+ * Update access level for a user.
+ * @param {number} boardId - Board ID
+ * @param {number} userId - User ID
+ * @param {string} accessLevel - Access level: 'READ', 'WRITE', or 'ADMIN'
+ */
+export const updateBoardAccess = async (boardId, userId, accessLevel) => {
+  const response = await api.put(`/boards/${boardId}/access/${userId}`, {
+    accessLevel,
+  });
+  return response.data;
+};
+
+/**
+ * Revoke access from a user.
+ * @param {number} boardId - Board ID
+ * @param {number} userId - User ID
+ */
+export const revokeBoardAccess = async (boardId, userId) => {
+  await api.delete(`/boards/${boardId}/access/${userId}`);
+};
+
 export default api;
 

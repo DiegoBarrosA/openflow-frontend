@@ -4,6 +4,7 @@ import api, { updateStatus, reorderStatuses, updateBoard } from '../services/api
 import Task from './Task';
 import CustomFieldManager from './CustomFieldManager';
 import CustomFields from './CustomFields';
+import BoardAccessManager from './BoardAccessManager';
 import { useAuth, ROLES } from '../contexts/AuthContext';
 import { useTranslation } from '../contexts/I18nContext';
 import { useBoardActions } from '../contexts/BoardActionsContext';
@@ -40,6 +41,7 @@ function Board() {
   
   // Board settings state
   const [showBoardSettings, setShowBoardSettings] = useState(false);
+  const [showBoardAccessManager, setShowBoardAccessManager] = useState(false);
   
   // Edit layout mode - when true, columns are draggable; when false, tasks are draggable
   const [editLayoutMode, setEditLayoutMode] = useState(false);
@@ -640,6 +642,15 @@ function Board() {
         <CustomFieldManager
           boardId={parseInt(id)}
           onClose={() => setShowCustomFieldManager(false)}
+        />
+      )}
+
+      {/* Board Access Manager Modal */}
+      {showBoardAccessManager && board && (
+        <BoardAccessManager
+          boardId={parseInt(id)}
+          boardOwnerId={board.userId}
+          onClose={() => setShowBoardAccessManager(false)}
         />
       )}
 

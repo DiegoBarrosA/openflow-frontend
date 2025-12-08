@@ -230,6 +230,27 @@
     "daysAgo": "hace {{count}} días",
     "deleteConfirm": "¿Estás seguro de que quieres eliminar este comentario?"
   },
+  "boardAccess": {
+    "manageAccess": "Gestionar Acceso",
+    "usersWithAccess": "Usuarios con Acceso",
+    "grantAccess": "Otorgar Acceso",
+    "selectUser": "Seleccionar Usuario",
+    "accessLevel": "Nivel de Acceso",
+    "read": "Lectura",
+    "write": "Escritura",
+    "admin": "Administrador",
+    "owner": "Propietario",
+    "revoke": "Revocar",
+    "update": "Actualizar",
+    "sharedWithYou": "Compartido contigo",
+    "grantedBy": "Otorgado por",
+    "noUsersWithAccess": "Aún no hay usuarios con acceso a este tablero.",
+    "failedToLoad": "Error al cargar información de acceso",
+    "failedToGrant": "Error al otorgar acceso",
+    "failedToUpdate": "Error al actualizar acceso",
+    "failedToRevoke": "Error al revocar acceso",
+    "revokeConfirm": "¿Estás seguro de que quieres revocar el acceso de este usuario?"
+  },
   "history": {
     "title": "Historial",
     "loading": "Cargando historial...",
