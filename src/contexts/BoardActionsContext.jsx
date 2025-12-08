@@ -3,10 +3,14 @@ import React, { createContext, useContext, useState } from 'react';
 const BoardActionsContext = createContext(null);
 
 export function BoardActionsProvider({ children }) {
-  const [boardActions, setBoardActions] = useState(null);
+  const [boardData, setBoardData] = useState(null);
+
+  const setBoardActions = (data) => {
+    setBoardData(data);
+  };
 
   return (
-    <BoardActionsContext.Provider value={{ boardActions, setBoardActions }}>
+    <BoardActionsContext.Provider value={{ boardData, setBoardActions }}>
       {children}
     </BoardActionsContext.Provider>
   );
@@ -15,7 +19,7 @@ export function BoardActionsProvider({ children }) {
 export function useBoardActions() {
   const context = useContext(BoardActionsContext);
   if (!context) {
-    return { boardActions: null, setBoardActions: () => {} };
+    return { boardData: null, setBoardActions: () => {} };
   }
   return context;
 }

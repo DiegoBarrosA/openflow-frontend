@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getPublicBoard, getPublicBoardStatuses, getPublicBoardTasks } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from '../contexts/I18nContext';
+import { useBoardActions } from '../contexts/BoardActionsContext';
 
 /**
  * Public board view - read-only, no authentication required.
@@ -12,6 +13,7 @@ function PublicBoard() {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const t = useTranslation();
+  const { setBoardActions } = useBoardActions();
   const [board, setBoard] = useState(null);
   const [statuses, setStatuses] = useState([]);
   const [tasks, setTasks] = useState([]);
@@ -21,6 +23,26 @@ function PublicBoard() {
   useEffect(() => {
     fetchBoardData();
   }, [id]);
+
+  // Set board data for NavigationBar
+  useEffect(() => {
+    if (board) {
+      setBoardActions({
+        boardId: parseInt(id),
+        boardName: board.name,
+        boardBadges: [{ type: 'publicReadOnly', label: t('board.publicReadOnly'), icon: 'fa-lock' }],
+        showBackButton: true,
+        backTo: '/public/boards',
+        adminActions: null,
+      });
+    } else {
+      setBoardActions(null);
+    }
+
+    return () => {
+      setBoardActions(null);
+    };
+  }, [board, id, setBoardActions, t]);
 
   const fetchBoardData = async () => {
     try {

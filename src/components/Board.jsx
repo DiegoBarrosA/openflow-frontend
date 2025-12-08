@@ -50,51 +50,61 @@ function Board() {
     fetchTasks();
   }, [id]);
 
-  // Set board actions for NavigationBar
+  // Set board data for NavigationBar
   useEffect(() => {
-    if (board && isAdmin()) {
-      setBoardActions(
-        <>
-          <button
-            onClick={() => setEditLayoutMode(!editLayoutMode)}
-            className={`px-4 py-2.5 sm:py-2 rounded-md transition-colors shadow-sm font-medium touch-target text-sm sm:text-base ${
-              editLayoutMode 
-                ? 'bg-base-0D text-base-07 hover:bg-base-0D/90' 
-                : 'bg-base-01 dark:bg-base-02 text-base-05 hover:bg-base-02 dark:hover:bg-base-03'
-            }`}
-            aria-label={editLayoutMode ? t('board.exitLayoutEditMode') : t('board.enterLayoutEditMode')}
-            title={editLayoutMode ? t('board.clickToExitLayoutEditing') : t('board.clickToReorderColumns')}
-          >
-            <i className={`fas fa-${editLayoutMode ? 'check' : 'arrows-alt'} mr-2`} aria-hidden="true"></i>
-            {editLayoutMode ? t('board.done') : t('board.reorder')}
-          </button>
-          <button
-            onClick={() => setShowBoardSettings(true)}
-            className="bg-base-01 dark:bg-base-02 hover:bg-base-02 dark:hover:bg-base-03 px-3 py-2.5 sm:py-2 rounded-md transition-colors shadow-sm text-base-05 font-medium touch-target text-sm sm:text-base"
-            aria-label={t('board.boardSettings')}
-            title={t('board.boardSettings')}
-          >
-            <i className="fas fa-cog" aria-hidden="true"></i>
-          </button>
-          <button
-            onClick={() => setShowCustomFieldManager(true)}
-            className="bg-base-0E hover:bg-base-0E/90 px-4 sm:px-5 py-2.5 sm:py-2 rounded-md transition-colors shadow-sm text-base-07 font-medium touch-target text-sm sm:text-base"
-            aria-label={t('board.manageCustomFields')}
-          >
-            <i className="fas fa-tags mr-2" aria-hidden="true"></i>
-            {t('board.customFields')}
-          </button>
-          <button
-            onClick={() => setShowStatusForm(!showStatusForm)}
-            className="bg-base-0C hover:bg-base-0C/90 px-5 sm:px-6 py-2.5 sm:py-2 rounded-md transition-colors shadow-sm text-base-00 dark:text-base-05 font-medium touch-target w-full sm:w-auto text-sm sm:text-base"
-            aria-label={showStatusForm ? t('common.cancel') : t('board.addStatus')}
-            aria-expanded={showStatusForm}
-          >
-            <i className={`fas fa-${showStatusForm ? 'times' : 'plus'} mr-2`} aria-hidden="true"></i>
-            {showStatusForm ? t('common.cancel') : t('board.addStatus')}
-          </button>
-        </>
-      );
+    if (board) {
+      setBoardActions({
+        boardId: parseInt(id),
+        boardName: board.name,
+        boardBadges: [
+          ...(board.isPublic ? [{ type: 'public', label: t('board.public'), icon: 'fa-globe' }] : []),
+          ...(board.isTemplate ? [{ type: 'template', label: t('board.template'), icon: 'fa-copy' }] : []),
+        ],
+        showBackButton: true,
+        backTo: '/boards',
+        adminActions: isAdmin() ? (
+          <>
+            <button
+              onClick={() => setEditLayoutMode(!editLayoutMode)}
+              className={`px-4 py-2.5 sm:py-2 rounded-md transition-colors shadow-sm font-medium touch-target text-sm sm:text-base ${
+                editLayoutMode 
+                  ? 'bg-base-0D text-base-07 hover:bg-base-0D/90' 
+                  : 'bg-base-01 dark:bg-base-02 text-base-05 hover:bg-base-02 dark:hover:bg-base-03'
+              }`}
+              aria-label={editLayoutMode ? t('board.exitLayoutEditMode') : t('board.enterLayoutEditMode')}
+              title={editLayoutMode ? t('board.clickToExitLayoutEditing') : t('board.clickToReorderColumns')}
+            >
+              <i className={`fas fa-${editLayoutMode ? 'check' : 'arrows-alt'} mr-2`} aria-hidden="true"></i>
+              {editLayoutMode ? t('board.done') : t('board.reorder')}
+            </button>
+            <button
+              onClick={() => setShowBoardSettings(true)}
+              className="bg-base-01 dark:bg-base-02 hover:bg-base-02 dark:hover:bg-base-03 px-3 py-2.5 sm:py-2 rounded-md transition-colors shadow-sm text-base-05 font-medium touch-target text-sm sm:text-base"
+              aria-label={t('board.boardSettings')}
+              title={t('board.boardSettings')}
+            >
+              <i className="fas fa-cog" aria-hidden="true"></i>
+            </button>
+            <button
+              onClick={() => setShowCustomFieldManager(true)}
+              className="bg-base-0E hover:bg-base-0E/90 px-4 sm:px-5 py-2.5 sm:py-2 rounded-md transition-colors shadow-sm text-base-07 font-medium touch-target text-sm sm:text-base"
+              aria-label={t('board.manageCustomFields')}
+            >
+              <i className="fas fa-tags mr-2" aria-hidden="true"></i>
+              {t('board.customFields')}
+            </button>
+            <button
+              onClick={() => setShowStatusForm(!showStatusForm)}
+              className="bg-base-0C hover:bg-base-0C/90 px-5 sm:px-6 py-2.5 sm:py-2 rounded-md transition-colors shadow-sm text-base-00 dark:text-base-05 font-medium touch-target w-full sm:w-auto text-sm sm:text-base"
+              aria-label={showStatusForm ? t('common.cancel') : t('board.addStatus')}
+              aria-expanded={showStatusForm}
+            >
+              <i className={`fas fa-${showStatusForm ? 'times' : 'plus'} mr-2`} aria-hidden="true"></i>
+              {showStatusForm ? t('common.cancel') : t('board.addStatus')}
+            </button>
+          </>
+        ) : null,
+      });
     } else {
       setBoardActions(null);
     }
@@ -102,7 +112,7 @@ function Board() {
     return () => {
       setBoardActions(null);
     };
-  }, [board, editLayoutMode, showStatusForm, setBoardActions, t, isAdmin]);
+  }, [board, editLayoutMode, showStatusForm, setBoardActions, t, isAdmin, id]);
 
   const fetchBoard = async () => {
     try {

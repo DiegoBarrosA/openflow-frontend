@@ -12,20 +12,13 @@ import api from '../services/api';
 /**
  * Unified NavigationBar component - context-aware navigation that adapts to current route
  */
-function NavigationBar({ 
-  boardName, 
-  boardBadges = [], 
-  showBackButton = false, 
-  backTo = null,
-  boardActions = null,
-  isPublicView = false 
-}) {
+function NavigationBar() {
   const location = useLocation();
   const navigate = useNavigate();
   const params = useParams();
   const { isAuthenticated, isAdmin, getUsername, getRole, logout } = useAuth();
   const t = useTranslation();
-  const { boardActions } = useBoardActions();
+  const { boardData } = useBoardActions();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [board, setBoard] = useState(null);
   const menuRef = useRef(null);
@@ -87,14 +80,14 @@ function NavigationBar({
   };
 
   const getBackRoute = () => {
-    if (backTo) return backTo;
+    if (boardData?.backTo) return boardData.backTo;
     if (isBoardView) return '/boards';
     if (isPublicBoardView) return '/public/boards';
     return '/public/boards';
   };
 
-  const displayBoardName = boardName || board?.name;
-  const displayBadges = boardBadges.length > 0 ? boardBadges : [
+  const displayBoardName = boardData?.boardName || board?.name;
+  const displayBadges = boardData?.boardBadges?.length > 0 ? boardData.boardBadges : [
     ...(isPublicBoardView ? [{ type: 'publicReadOnly', label: t('board.publicReadOnly'), icon: 'fa-lock' }] : []),
     ...(board?.isPublic && !isPublicBoardView ? [{ type: 'public', label: t('board.public'), icon: 'fa-globe' }] : []),
     ...(board?.isTemplate ? [{ type: 'template', label: t('board.template'), icon: 'fa-copy' }] : [])
@@ -126,7 +119,7 @@ function NavigationBar({
       <div className={`${isBoardView || isPublicBoardView ? 'max-w-full' : 'max-w-7xl'} mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4`}>
         {/* Left side: Logo/Back button + Title */}
         <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
-          {(showBackButton || isBoardView || isPublicBoardView) && (
+          {(boardData?.showBackButton || isBoardView || isPublicBoardView) && (
             <button
               onClick={() => navigate(getBackRoute())}
               className="bg-base-0C hover:bg-base-0C/90 px-4 py-2.5 sm:py-2 rounded-md transition-colors shadow-sm text-base-00 dark:text-base-05 font-medium touch-target text-sm sm:text-base flex-shrink-0"
@@ -178,7 +171,7 @@ function NavigationBar({
         {/* Right side: Actions, controls, user menu */}
         <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0">
           {/* Board-specific actions (admin controls) from context */}
-          {boardActions}
+          {boardData?.adminActions}
 
           {/* Subscribe button for board views */}
           {(isBoardView || isPublicBoardView) && boardId && isAuthenticated() && (
