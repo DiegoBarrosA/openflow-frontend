@@ -66,7 +66,7 @@ function PublicBoardList() {
             {boards.map((board) => (
               <article
                 key={board.id}
-                className="bg-base-07 dark:bg-base-01 rounded-lg shadow-md p-5 sm:p-6 hover:shadow-lg transition-shadow border-l-4 border-base-0C"
+                className="bg-base-07 dark:bg-base-01 rounded-lg shadow-md p-5 sm:p-6 hover:shadow-lg transition-shadow"
                 role="listitem"
               >
                 <h3

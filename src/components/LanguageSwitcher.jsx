@@ -14,15 +14,16 @@ function LanguageSwitcher() {
   };
 
   return (
-    <div className="flex items-center gap-2">
-      <label htmlFor="language-select" className="sr-only">
+    <div className="flex items-center justify-between w-full">
+      <label htmlFor="language-select" className="text-sm font-medium text-base-05 flex items-center gap-2">
+        <i className="fas fa-language" aria-hidden="true"></i>
         {t('language.switch')}
       </label>
       <select
         id="language-select"
         value={language}
         onChange={handleLanguageChange}
-        className="bg-transparent border border-gray-300 dark:border-gray-600 rounded-md px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-primary-dark cursor-pointer"
+        className="bg-base-01 dark:bg-base-02 border border-base-02 dark:border-base-03 rounded-md px-3 py-1.5 text-sm text-base-05 focus:outline-none focus:ring-2 focus:ring-base-0D cursor-pointer"
         aria-label={t('language.switch')}
       >
         <option value="en">{supportedLanguages.en}</option>

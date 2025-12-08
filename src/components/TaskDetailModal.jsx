@@ -159,7 +159,7 @@ function TaskDetailModal({ task, boardId, onClose, onUpdate, onDelete }) {
                 >
                   {task.assignedUsername ? (
                     <>
-                      <div className="w-8 h-8 rounded-full bg-base-0C flex items-center justify-center text-base-00 dark:text-base-05 font-semibold text-sm">
+                      <div className="w-8 h-8 rounded-full bg-base-0D flex items-center justify-center text-base-07 font-semibold text-sm">
                         {task.assignedUsername.charAt(0).toUpperCase()}
                       </div>
                       <span className="text-base-05">{task.assignedUsername}</span>

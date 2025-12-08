@@ -95,7 +95,7 @@ function Board() {
             </button>
             <button
               onClick={() => setShowStatusForm(!showStatusForm)}
-              className="bg-base-0C hover:bg-base-0C/90 px-5 sm:px-6 py-2.5 sm:py-2 rounded-md transition-colors shadow-sm text-base-00 dark:text-base-05 font-medium touch-target w-full sm:w-auto text-sm sm:text-base"
+              className="bg-base-0D hover:bg-base-0D/90 px-5 sm:px-6 py-2.5 sm:py-2 rounded-md transition-colors shadow-sm text-base-07 font-medium touch-target w-full sm:w-auto text-sm sm:text-base"
               aria-label={showStatusForm ? t('common.cancel') : t('board.addStatus')}
               aria-expanded={showStatusForm}
             >
@@ -459,14 +459,14 @@ function Board() {
             {statuses.map((status) => (
               <section
                 key={status.id}
-                className={`flex-shrink-0 w-full sm:w-[280px] md:w-[300px] bg-base-07 dark:bg-base-01 rounded-lg p-3 sm:p-4 transition-colors border-2 ${
+                className={`flex-shrink-0 w-full sm:w-[280px] md:w-[300px] bg-base-07 dark:bg-base-01 rounded-lg p-3 sm:p-4 transition-colors border ${
                   dragOverStatusId === status.id
-                    ? 'bg-base-0C/30 border-dashed border-base-0D border-2'
+                    ? 'bg-base-0D/30 border-dashed border-base-0D'
                     : dragOverColumnId === status.id
-                    ? 'bg-base-0E/20 border-dashed border-base-0E border-2'
+                    ? 'bg-base-0E/20 border-dashed border-base-0E'
                     : editLayoutMode && isAdmin()
                     ? 'border-dashed border-base-0D/50'
-                    : 'border-base-0E/30'
+                    : 'border-base-02 dark:border-base-03'
                 } ${draggedColumnId === status.id ? 'opacity-50' : ''}`}
                 draggable={isAdmin() && editLayoutMode}
                 onDragStart={(e) => isAdmin() && editLayoutMode && handleColumnDragStart(e, status.id)}
@@ -540,7 +540,7 @@ function Board() {
                     setSelectedStatusId(status.id);
                     setShowTaskForm(true);
                   }}
-                  className="w-full mt-3 py-2.5 sm:py-2 bg-base-0C hover:bg-base-0C/90 rounded-md text-base-00 dark:text-base-05 text-sm sm:text-base transition-colors shadow-sm font-medium touch-target"
+                  className="w-full mt-3 py-2.5 sm:py-2 bg-base-0D hover:bg-base-0D/90 rounded-md text-base-07 text-sm sm:text-base transition-colors shadow-sm font-medium touch-target"
                   aria-label={`${t('board.addTaskTo')} ${status.name}`}
                 >
                   <i className="fas fa-plus mr-2" aria-hidden="true"></i>

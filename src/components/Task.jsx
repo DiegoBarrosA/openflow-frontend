@@ -46,7 +46,7 @@ function Task({ task, boardId, onDelete, onUpdate, onDragStart, onDragEnd }) {
   return (
     <>
       <article
-        className={`bg-base-07 dark:bg-base-01 rounded-md p-3 sm:p-3 shadow-sm mb-2 relative hover:shadow-md transition-all select-none hover:-translate-y-0.5 group border-l-4 border-base-0C hover:border-base-0D ${
+        className={`bg-base-07 dark:bg-base-01 rounded-md p-3 sm:p-3 shadow-sm mb-2 relative hover:shadow-md transition-all select-none hover:-translate-y-0.5 group ${
           isDraggable ? 'cursor-grab active:cursor-grabbing' : 'cursor-default'
         }`}
         draggable={isDraggable}
@@ -72,7 +72,7 @@ function Task({ task, boardId, onDelete, onUpdate, onDragStart, onDragEnd }) {
             <h4 className="text-sm sm:text-base font-medium text-base-05 mb-1 flex-1">{task.title}</h4>
             {task.assignedUsername && (
               <div 
-                className="w-6 h-6 rounded-full bg-base-0C flex items-center justify-center text-base-00 dark:text-base-05 font-semibold text-xs flex-shrink-0"
+                className="w-6 h-6 rounded-full bg-base-0D flex items-center justify-center text-base-07 font-semibold text-xs flex-shrink-0"
                 title={`${t('task.assignee')}: ${task.assignedUsername}`}
               >
                 {task.assignedUsername.charAt(0).toUpperCase()}

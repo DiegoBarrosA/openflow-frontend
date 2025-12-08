@@ -284,7 +284,7 @@ const CustomFields = ({ taskId, boardId, readOnly = false, mode = 'edit', onChan
             disabled={readOnly || isSaving}
             className={`w-6 h-6 rounded-md border-2 transition-all duration-200 flex items-center justify-center
               ${isChecked 
-                ? 'bg-base-0C border-base-0C text-base-00 dark:text-base-05' 
+                ? 'bg-base-0D border-base-0D text-base-07' 
                 : 'bg-base-07 dark:bg-base-00 border-base-0E/40 hover:border-base-0E'
               }
               ${readOnly || isSaving ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}

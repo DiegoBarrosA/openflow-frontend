@@ -123,7 +123,7 @@ const ChangeHistory = ({ entityType, entityId }) => {
       </button>
 
       {isExpanded && (
-        <div className="mt-3 border-l-2 border-base-02 dark:border-base-03 pl-4 space-y-3">
+        <div className="mt-3 pl-4 space-y-3">
           {loading && (
             <div className="text-sm text-base-04">
               <i className="fas fa-spinner fa-spin mr-2" aria-hidden="true"></i>

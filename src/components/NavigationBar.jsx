@@ -122,11 +122,10 @@ function NavigationBar() {
           {(boardData?.showBackButton || isBoardView || isPublicBoardView) && (
             <button
               onClick={() => navigate(getBackRoute())}
-              className="bg-base-0C hover:bg-base-0C/90 px-4 py-2.5 sm:py-2 rounded-md transition-colors shadow-sm text-base-00 dark:text-base-05 font-medium touch-target text-sm sm:text-base flex-shrink-0"
+              className="p-2 rounded-md hover:bg-base-01 dark:hover:bg-base-02 transition-colors flex-shrink-0"
               aria-label={t('common.back')}
             >
-              <i className="fas fa-arrow-left mr-2" aria-hidden="true"></i>
-              {t('common.back')}
+              <i className="fas fa-arrow-left text-base-05" aria-hidden="true"></i>
             </button>
           )}
           
@@ -233,9 +232,8 @@ function NavigationBar() {
             </Link>
           )}
 
-          {/* Language and Theme switchers */}
-          <LanguageSwitcher />
-          <ThemeSwitcher />
+          {/* Theme switcher (only when not authenticated) */}
+          {!isAuthenticated() && <ThemeSwitcher />}
 
           {/* Notifications (only when authenticated) */}
           {isAuthenticated() && <NotificationBell />}
@@ -245,23 +243,20 @@ function NavigationBar() {
             <div className="relative" ref={menuRef}>
               <button
                 onClick={() => setShowUserMenu(!showUserMenu)}
-                className="flex items-center gap-2 sm:gap-3 px-3 py-2 rounded-md hover:bg-base-01 dark:hover:bg-base-02 transition-colors touch-target"
+                className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-base-01 dark:hover:bg-base-02 transition-colors touch-target"
                 aria-label="User menu"
                 aria-expanded={showUserMenu}
               >
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-base-0C flex items-center justify-center text-base-00 dark:text-base-05 font-semibold text-sm sm:text-base">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-base-0D flex items-center justify-center text-base-07 font-semibold text-sm sm:text-base">
                   {username?.charAt(0).toUpperCase() || 'U'}
                 </div>
-                <span className="text-base-05 text-sm sm:text-base font-medium hidden sm:block">
-                  {username}
-                </span>
                 <i className={`fas fa-chevron-${showUserMenu ? 'up' : 'down'} text-base-04`} aria-hidden="true"></i>
               </button>
               {showUserMenu && (
                 <div className="absolute right-0 mt-2 w-48 sm:w-56 bg-base-07 dark:bg-base-01 rounded-md shadow-lg border border-base-02 dark:border-base-03 py-2 z-50">
                   <div className="px-4 py-3 border-b border-base-02 dark:border-base-03">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-base-0C flex items-center justify-center text-base-00 dark:text-base-05 font-semibold">
+                      <div className="w-10 h-10 rounded-full bg-base-0D flex items-center justify-center text-base-07 font-semibold">
                         {username?.charAt(0).toUpperCase() || 'U'}
                       </div>
                       <div>
@@ -275,6 +270,12 @@ function NavigationBar() {
                         </span>
                       </div>
                     </div>
+                  </div>
+                  <div className="px-4 py-2 border-b border-base-02 dark:border-base-03">
+                    <LanguageSwitcher />
+                  </div>
+                  <div className="px-4 py-2 border-b border-base-02 dark:border-base-03">
+                    <ThemeSwitcher inMenu={true} />
                   </div>
                   <button
                     onClick={handleLogout}

@@ -67,7 +67,7 @@ function OAuthCallback() {
   }, [navigate, login]);
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-base-0D via-base-0C to-base-0E container-responsive py-8">
+    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-base-0D via-base-0D to-base-0E container-responsive py-8">
       <div className="bg-base-07 dark:bg-base-01 p-6 sm:p-8 md:p-10 rounded-lg shadow-xl w-full max-w-md border border-base-02 dark:border-base-03 text-center">
         {error ? (
           <>

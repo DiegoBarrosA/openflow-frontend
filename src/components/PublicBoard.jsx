@@ -143,7 +143,7 @@ function PublicBoard() {
                   {getTasksByStatus(status.id).map((task) => (
                     <article
                       key={task.id}
-                      className="bg-base-01 dark:bg-base-02 rounded-md p-3 shadow-sm border-l-4 border-base-0D"
+                      className="bg-base-01 dark:bg-base-02 rounded-md p-3 shadow-sm"
                       role="listitem"
                     >
                       <h4 className="font-medium text-base-05 text-sm">{task.title}</h4>
