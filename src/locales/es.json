@@ -62,7 +62,7 @@
     "oauth": {
       "error": "Error de Autenticación",
       "completing": "Completando Inicio de Sesión",
-      "redirecting": "Redirigiendo al inicio de sesión...",
+      "redirecting": "Redirigiendo a boards públicos...",
       "failed": "Error de autenticación",
       "tokenNotReceived": "Autenticación exitosa pero no se recibió el token",
       "pleaseTryAgain": "Error de autenticación. Por favor, intenta iniciar sesión nuevamente.",

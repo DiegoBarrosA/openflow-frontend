@@ -5,8 +5,6 @@ import { I18nProvider, useI18n } from './contexts/I18nContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { BoardActionsProvider } from './contexts/BoardActionsContext';
 import NavigationBar from './components/NavigationBar';
-import Login from './components/Login';
-import Register from './components/Register';
 import BoardList from './components/BoardList';
 import Board from './components/Board';
 import OAuthCallback from './components/OAuthCallback';
@@ -74,8 +72,6 @@ function AppRoutes() {
   return (
     <Routes>
       {/* Public routes - no authentication required */}
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
       <Route path="/oauth-callback" element={<OAuthCallback />} />
       
       {/* Public board viewing - no authentication required */}
@@ -112,14 +108,14 @@ function App() {
       <ThemeProvider>
         <I18nProvider>
           <LanguageUpdater />
-          <AuthProvider>
+      <AuthProvider>
             <BoardActionsProvider>
               <div className="min-h-screen bg-base-00">
                 <NavigationBar />
-                <AppRoutes />
-              </div>
+          <AppRoutes />
+        </div>
             </BoardActionsProvider>
-          </AuthProvider>
+      </AuthProvider>
         </I18nProvider>
       </ThemeProvider>
     </Router>

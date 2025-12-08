@@ -106,7 +106,7 @@ function PublicBoard() {
         <div className="max-w-7xl mx-auto container-responsive py-2">
           <p className="text-base-04">{board.description}</p>
         </div>
-      )}
+        )}
 
       <main className="max-w-full mx-auto container-responsive py-6 sm:py-8 overflow-x-auto">
         {statuses.length === 0 ? (

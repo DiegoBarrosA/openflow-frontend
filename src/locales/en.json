@@ -62,7 +62,7 @@
     "oauth": {
       "error": "Authentication Error",
       "completing": "Completing Sign In",
-      "redirecting": "Redirecting to login...",
+      "redirecting": "Redirecting to public boards...",
       "failed": "Authentication failed",
       "tokenNotReceived": "Authentication successful but token not received",
       "pleaseTryAgain": "Authentication failed. Please try logging in again.",

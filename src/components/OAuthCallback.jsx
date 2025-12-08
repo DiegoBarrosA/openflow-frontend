@@ -54,12 +54,12 @@ function OAuthCallback() {
             }
           } catch (authErr) {
             setError(t('auth.oauth.pleaseTryAgain'));
-            setTimeout(() => navigate('/login'), 3000);
+            setTimeout(() => navigate('/public/boards'), 3000);
           }
         }
       } catch (err) {
         setError(t('auth.oauth.errorOccurred'));
-        setTimeout(() => navigate('/login'), 3000);
+        setTimeout(() => navigate('/public/boards'), 3000);
       }
     };
 

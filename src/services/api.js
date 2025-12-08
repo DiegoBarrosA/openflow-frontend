@@ -33,11 +33,11 @@ api.interceptors.response.use(
       localStorage.removeItem('token');
       localStorage.removeItem('username');
       localStorage.removeItem('role');
-      // Only redirect if not already on login/register page or public pages
-      const publicPaths = ['/login', '/register', '/public'];
+      // Only redirect if not already on public pages
+      const publicPaths = ['/public', '/oauth-callback'];
       const isPublicPath = publicPaths.some(path => window.location.pathname.includes(path));
       if (!isPublicPath) {
-        window.location.href = '/login';
+        window.location.href = '/public/boards';
       }
     }
     return Promise.reject(error);

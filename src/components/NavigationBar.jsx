@@ -7,7 +7,7 @@ import LanguageSwitcher from './LanguageSwitcher';
 import ThemeSwitcher from './ThemeSwitcher';
 import NotificationBell from './NotificationBell';
 import SubscribeButton from './SubscribeButton';
-import api from '../services/api';
+import api, { azureLogin } from '../services/api';
 
 /**
  * Unified NavigationBar component - context-aware navigation that adapts to current route
@@ -28,7 +28,7 @@ function NavigationBar() {
   const boardId = params.id;
   const isBoardView = location.pathname.startsWith('/boards/') && boardId;
   const isPublicBoardView = location.pathname.startsWith('/public/boards/') && boardId;
-  const isLoginOrRegister = location.pathname === '/login' || location.pathname === '/register' || location.pathname === '/oauth-callback';
+  const isOAuthCallback = location.pathname === '/oauth-callback';
   const isBoardsList = location.pathname === '/boards';
   const isPublicBoardsList = location.pathname === '/public/boards';
 
@@ -69,7 +69,7 @@ function NavigationBar() {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate('/public/boards');
   };
 
   const getHomeRoute = () => {
@@ -93,8 +93,8 @@ function NavigationBar() {
     ...(board?.isTemplate ? [{ type: 'template', label: t('board.template'), icon: 'fa-copy' }] : [])
   ];
 
-  // Minimal header for login/register
-  if (isLoginOrRegister) {
+  // Minimal header for OAuth callback
+  if (isOAuthCallback) {
     return (
       <header className="bg-base-00 text-base-05 container-responsive py-4 sm:py-5 border-b border-base-02 dark:border-base-03">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
@@ -200,23 +200,25 @@ function NavigationBar() {
             </Link>
           )}
 
-          {/* Public boards: Show login/register if not authenticated */}
+          {/* Public boards: Show Microsoft SSO login if not authenticated */}
           {(isPublicBoardsList || isPublicBoardView) && !isAuthenticated() && (
             <>
-              <Link
-                to="/login"
+              <button
+                onClick={azureLogin}
                 className="bg-base-0D text-base-07 px-4 py-2 rounded-md hover:bg-base-0D/90 transition-colors text-sm font-medium"
+                aria-label={t('auth.login.signInWithMicrosoft')}
               >
-                <i className="fas fa-sign-in-alt mr-2" aria-hidden="true"></i>
+                <i className="fab fa-microsoft mr-2" aria-hidden="true"></i>
                 {t('board.signIn')}
-              </Link>
-              <Link
-                to="/register"
+              </button>
+              <button
+                onClick={azureLogin}
                 className="bg-base-01 dark:bg-base-02 text-base-05 px-4 py-2 rounded-md hover:bg-base-02 dark:hover:bg-base-03 transition-colors text-sm font-medium"
+                aria-label={t('auth.login.signInWithMicrosoft')}
               >
-                <i className="fas fa-user-plus mr-2" aria-hidden="true"></i>
+                <i className="fab fa-microsoft mr-2" aria-hidden="true"></i>
                 {t('common.register')}
-              </Link>
+              </button>
             </>
           )}
 
