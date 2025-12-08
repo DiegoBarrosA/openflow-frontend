@@ -34,6 +34,7 @@
     "daysAgo": "d hace",
     "unread": "no leído",
     "saving": "Guardando...",
+    "posting": "Publicando...",
     "locale": "es-ES"
   },
   "auth": {
@@ -210,6 +211,24 @@
     "savedSuccessfully": "¡Guardado exitosamente!",
     "saving": "Guardando...",
     "editTask": "Editar Tarea"
+  },
+  "comment": {
+    "comments": "Comentarios",
+    "add": "Agregar Comentario",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "placeholder": "Escribe un comentario...",
+    "noComments": "Aún no hay comentarios. ¡Sé el primero en comentar!",
+    "postedBy": "Publicado por",
+    "edited": "editado",
+    "justNow": "Ahora mismo",
+    "minuteAgo": "hace un minuto",
+    "minutesAgo": "hace {{count}} minutos",
+    "hourAgo": "hace una hora",
+    "hoursAgo": "hace {{count}} horas",
+    "dayAgo": "hace un día",
+    "daysAgo": "hace {{count}} días",
+    "deleteConfirm": "¿Estás seguro de que quieres eliminar este comentario?"
   },
   "history": {
     "title": "Historial",

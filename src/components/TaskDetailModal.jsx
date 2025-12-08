@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import CustomFields from './CustomFields';
 import ChangeHistory from './ChangeHistory';
 import SubscribeButton from './SubscribeButton';
+import TaskComments from './TaskComments';
 import { getAllUsers } from '../services/api';
 import { useTranslation } from '../contexts/I18nContext';
 
@@ -201,6 +202,11 @@ function TaskDetailModal({ task, boardId, onClose, onUpdate, onDelete }) {
                 boardId={boardId} 
                 readOnly={false}
               />
+            </div>
+
+            {/* Comments */}
+            <div className="border-t border-base-02 dark:border-base-03 pt-4">
+              <TaskComments taskId={task.id} />
             </div>
 
             {/* Change History */}

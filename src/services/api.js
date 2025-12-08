@@ -373,5 +373,49 @@ export const extractRoleFromToken = (token) => {
   return 'USER'; // Default to USER if no role claim
 };
 
+// ==================== Comments ====================
+
+/**
+ * Get all comments for a task.
+ * @param {number} taskId - Task ID
+ */
+export const getTaskComments = async (taskId) => {
+  const response = await api.get(`/comments/task/${taskId}`);
+  return response.data;
+};
+
+/**
+ * Create a comment on a task.
+ * @param {number} taskId - Task ID
+ * @param {string} content - Comment content
+ */
+export const createComment = async (taskId, content) => {
+  const response = await api.post('/comments', {
+    taskId,
+    content,
+  });
+  return response.data;
+};
+
+/**
+ * Update a comment.
+ * @param {number} commentId - Comment ID
+ * @param {string} content - Updated comment content
+ */
+export const updateComment = async (commentId, content) => {
+  const response = await api.put(`/comments/${commentId}`, {
+    content,
+  });
+  return response.data;
+};
+
+/**
+ * Delete a comment.
+ * @param {number} commentId - Comment ID
+ */
+export const deleteComment = async (commentId) => {
+  await api.delete(`/comments/${commentId}`);
+};
+
 export default api;
 
