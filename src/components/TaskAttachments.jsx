@@ -48,12 +48,25 @@ function TaskAttachments({ taskId }) {
     
     try {
       for (const file of files) {
+        // Validate file size before upload (10MB limit)
+        if (file.size > 10 * 1024 * 1024) {
+          setError(t('attachment.fileTooLarge'));
+          continue;
+        }
         const attachment = await uploadAttachment(taskId, file);
         setAttachments(prev => [...prev, attachment]);
       }
     } catch (err) {
       console.error('Error uploading file:', err);
-      setError(t('attachment.uploadFailed'));
+      
+      // Handle specific error codes
+      if (err.response?.status === 413) {
+        setError(t('attachment.fileTooLarge'));
+      } else if (err.response?.data?.error) {
+        setError(err.response.data.error);
+      } else {
+        setError(t('attachment.uploadFailed'));
+      }
     } finally {
       setIsUploading(false);
     }

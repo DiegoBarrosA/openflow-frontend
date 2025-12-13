@@ -58,7 +58,17 @@ function ProfileModal({ onClose }) {
       setUser(prev => ({ ...prev, profilePictureUrl: url }));
     } catch (err) {
       console.error('Error uploading profile picture:', err);
-      setError(t('profile.uploadFailed'));
+      
+      // Handle specific error codes
+      if (err.response?.status === 413) {
+        setError(t('profile.fileTooLarge'));
+      } else if (err.response?.status === 400) {
+        setError(err.response?.data?.error || t('profile.invalidFileType'));
+      } else if (err.response?.data?.error) {
+        setError(err.response.data.error);
+      } else {
+        setError(t('profile.uploadFailed'));
+      }
     } finally {
       setIsUploading(false);
     }

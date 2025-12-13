@@ -286,7 +286,8 @@
     "downloadFailed": "Error al obtener enlace de descarga",
     "deleteFailed": "Error al eliminar archivo adjunto",
     "deleteConfirm": "¿Estás seguro de que quieres eliminar este archivo adjunto?",
-    "download": "Descargar"
+    "download": "Descargar",
+    "fileTooLarge": "El archivo es demasiado grande. El tamaño máximo es 10MB"
   },
   "profile": {
     "title": "Mi Perfil",

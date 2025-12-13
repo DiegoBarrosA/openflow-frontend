@@ -286,7 +286,8 @@
     "downloadFailed": "Failed to get download link",
     "deleteFailed": "Failed to delete attachment",
     "deleteConfirm": "Are you sure you want to delete this attachment?",
-    "download": "Download"
+    "download": "Download",
+    "fileTooLarge": "File is too large. Maximum size is 10MB"
   },
   "profile": {
     "title": "My Profile",
