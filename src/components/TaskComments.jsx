@@ -160,9 +160,17 @@ function TaskComments({ taskId }) {
                 <>
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-base-0D flex items-center justify-center text-base-07 font-semibold text-sm">
-                        {comment.username?.charAt(0).toUpperCase() || 'U'}
-                      </div>
+                      {comment.profilePictureUrl ? (
+                        <img
+                          src={comment.profilePictureUrl}
+                          alt={comment.username}
+                          className="w-8 h-8 rounded-full object-cover border-2 border-base-0D"
+                        />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-base-0D flex items-center justify-center text-base-07 font-semibold text-sm">
+                          {comment.username?.charAt(0).toUpperCase() || 'U'}
+                        </div>
+                      )}
                       <div>
                         <p className="text-sm font-medium text-base-05">{comment.username}</p>
                         <p className="text-xs text-base-04">

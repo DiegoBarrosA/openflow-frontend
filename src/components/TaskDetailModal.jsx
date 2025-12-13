@@ -222,66 +222,47 @@ function TaskDetailModal({ task, boardId, onClose, onUpdate, onDelete }) {
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="flex items-center justify-between p-4 sm:p-6 border-t border-base-02 dark:border-base-03 bg-base-01 dark:bg-base-02">
-          <button
-            onClick={handleDelete}
-            className="text-base-08 hover:text-base-08/80 hover:bg-base-08/10 px-4 py-2 rounded-md transition-colors text-sm font-medium"
-            aria-label={t('board.deleteTask')}
-          >
-            <i className="fas fa-trash mr-2" aria-hidden="true"></i>
-            {t('board.deleteTask')}
-          </button>
-          
-          <div className="flex items-center gap-3">
-            {isEditing ? (
-              <>
-                <button
-                  onClick={handleCancel}
-                  className="px-4 py-2 text-base-05 hover:text-base-05 hover:bg-base-01 dark:hover:bg-base-02 rounded-md transition-colors text-sm font-medium"
-                  disabled={isSaving}
-                >
-                  <i className="fas fa-times mr-2" aria-hidden="true"></i>
-                  {t('common.cancel')}
-                </button>
-                <button
-                  onClick={handleSave}
-                  disabled={isSaving}
-                  className="bg-base-0D text-base-07 px-5 py-2 rounded-md hover:bg-base-0D/90 focus:outline-none focus:ring-2 focus:ring-base-0D focus:ring-offset-2 transition-colors shadow-sm text-sm font-medium disabled:opacity-50"
-                >
-                  {isSaving ? (
-                    <>
-                      <i className="fas fa-spinner fa-spin mr-2" aria-hidden="true"></i>
-                      {t('task.saving')}
-                    </>
-                  ) : (
-                    <>
-                      <i className="fas fa-save mr-2" aria-hidden="true"></i>
-                      {t('board.saveChanges')}
-                    </>
-                  )}
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  onClick={onClose}
-                  className="px-4 py-2 text-base-05 hover:text-base-05 hover:bg-base-01 dark:hover:bg-base-02 rounded-md transition-colors text-sm font-medium"
-                >
-                  <i className="fas fa-times mr-2" aria-hidden="true"></i>
-                  {t('common.close')}
-                </button>
-                <button
-                  onClick={() => setIsEditing(true)}
-                  className="bg-base-0D text-base-07 px-5 py-2 rounded-md hover:bg-base-0D/90 focus:outline-none focus:ring-2 focus:ring-base-0D focus:ring-offset-2 transition-colors shadow-sm text-sm font-medium"
-                >
-                  <i className="fas fa-edit mr-2" aria-hidden="true"></i>
-                  {t('task.editTask')}
-                </button>
-              </>
-            )}
+        {/* Footer - Only show when editing */}
+        {isEditing && (
+          <div className="flex items-center justify-between p-4 sm:p-6 border-t border-base-02 dark:border-base-03 bg-base-01 dark:bg-base-02">
+            <button
+              onClick={handleDelete}
+              className="text-base-08 hover:text-base-08/80 hover:bg-base-08/10 px-4 py-2 rounded-md transition-colors text-sm font-medium"
+              aria-label={t('board.deleteTask')}
+            >
+              <i className="fas fa-trash mr-2" aria-hidden="true"></i>
+              {t('board.deleteTask')}
+            </button>
+            
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleCancel}
+                className="px-4 py-2 text-base-05 hover:text-base-05 hover:bg-base-01 dark:hover:bg-base-02 rounded-md transition-colors text-sm font-medium"
+                disabled={isSaving}
+              >
+                <i className="fas fa-times mr-2" aria-hidden="true"></i>
+                {t('common.cancel')}
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={isSaving}
+                className="bg-base-0D text-base-07 px-5 py-2 rounded-md hover:bg-base-0D/90 focus:outline-none focus:ring-2 focus:ring-base-0D focus:ring-offset-2 transition-colors shadow-sm text-sm font-medium disabled:opacity-50"
+              >
+                {isSaving ? (
+                  <>
+                    <i className="fas fa-spinner fa-spin mr-2" aria-hidden="true"></i>
+                    {t('task.saving')}
+                  </>
+                ) : (
+                  <>
+                    <i className="fas fa-save mr-2" aria-hidden="true"></i>
+                    {t('board.saveChanges')}
+                  </>
+                )}
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
