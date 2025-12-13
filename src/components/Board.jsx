@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import api, { updateStatus, reorderStatuses, updateBoard } from '../services/api';
+import api, { updateStatus, reorderStatuses, updateBoard, getAllTasksCustomFields } from '../services/api';
 import Task from './Task';
 import CustomFieldManager from './CustomFieldManager';
 import CustomFields from './CustomFields';
@@ -8,6 +8,7 @@ import BoardAccessManager from './BoardAccessManager';
 import { useAuth, ROLES } from '../contexts/AuthContext';
 import { useTranslation } from '../contexts/I18nContext';
 import { useBoardActions } from '../contexts/BoardActionsContext';
+import { exportToMarkdown, exportToMermaid } from '../utils/exportUtils';
 
 function Board() {
   const { id } = useParams();
@@ -45,12 +46,32 @@ function Board() {
   
   // Edit layout mode - when true, columns are draggable; when false, tasks are draggable
   const [editLayoutMode, setEditLayoutMode] = useState(false);
+  
+  // Export menu state
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const exportMenuRef = useRef(null);
 
   useEffect(() => {
     fetchBoard();
     fetchStatuses();
     fetchTasks();
   }, [id]);
+
+  // Close export menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (exportMenuRef.current && !exportMenuRef.current.contains(event.target)) {
+        setShowExportMenu(false);
+      }
+    };
+    if (showExportMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showExportMenu]);
 
   // Set board data for NavigationBar
   useEffect(() => {
@@ -140,6 +161,26 @@ function Board() {
       setTasks(response.data);
     } catch (err) {
       console.error('Error fetching tasks:', err);
+    }
+  };
+
+  const handleExport = async (format) => {
+    setIsExporting(true);
+    setShowExportMenu(false);
+    
+    try {
+      // Fetch custom fields for all tasks
+      const customFieldsMap = await getAllTasksCustomFields(parseInt(id), tasks);
+      
+      if (format === 'markdown') {
+        exportToMarkdown(board, statuses, tasks, customFieldsMap);
+      } else if (format === 'mermaid') {
+        exportToMermaid(board, statuses, tasks, customFieldsMap);
+      }
+    } catch (err) {
+      console.error('Error exporting board:', err);
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -809,6 +850,53 @@ function Board() {
           </div>
         </div>
       )}
+
+      {/* Export Button - Floating */}
+      <div className="fixed bottom-6 right-6 z-40" ref={exportMenuRef}>
+        <div className="relative">
+          <button
+            onClick={() => setShowExportMenu(!showExportMenu)}
+            disabled={isExporting}
+            className="bg-base-0D hover:bg-base-0D/90 text-base-07 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-105 disabled:opacity-50"
+            aria-label={t('export.title')}
+            title={t('export.title')}
+          >
+            {isExporting ? (
+              <i className="fas fa-spinner fa-spin text-xl" aria-hidden="true"></i>
+            ) : (
+              <i className="fas fa-download text-xl" aria-hidden="true"></i>
+            )}
+          </button>
+          
+          {showExportMenu && (
+            <div className="absolute bottom-16 right-0 bg-base-07 dark:bg-base-01 rounded-lg shadow-xl border border-base-02 dark:border-base-03 py-2 min-w-48 animate-fade-in">
+              <div className="px-4 py-2 border-b border-base-02 dark:border-base-03">
+                <p className="text-sm font-medium text-base-05">{t('export.title')}</p>
+              </div>
+              <button
+                onClick={() => handleExport('markdown')}
+                className="w-full text-left px-4 py-3 text-sm text-base-05 hover:bg-base-01 dark:hover:bg-base-02 transition-colors flex items-center gap-3"
+              >
+                <i className="fab fa-markdown text-lg" aria-hidden="true"></i>
+                <div>
+                  <p className="font-medium">{t('export.markdown')}</p>
+                  <p className="text-xs text-base-04">{t('export.markdownDesc')}</p>
+                </div>
+              </button>
+              <button
+                onClick={() => handleExport('mermaid')}
+                className="w-full text-left px-4 py-3 text-sm text-base-05 hover:bg-base-01 dark:hover:bg-base-02 transition-colors flex items-center gap-3"
+              >
+                <i className="fas fa-project-diagram text-lg" aria-hidden="true"></i>
+                <div>
+                  <p className="font-medium">{t('export.mermaid')}</p>
+                  <p className="text-xs text-base-04">{t('export.mermaidDesc')}</p>
+                </div>
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

@@ -303,6 +303,13 @@
     "deleteConfirm": "¿Estás seguro de que quieres eliminar tu foto de perfil?",
     "invalidFileType": "Por favor selecciona un archivo de imagen",
     "fileTooLarge": "El archivo debe ser menor a 5MB"
+  },
+  "export": {
+    "title": "Exportar Tablero",
+    "markdown": "Markdown",
+    "markdownDesc": "Exportar como archivo .md",
+    "mermaid": "Mermaid Kanban",
+    "mermaidDesc": "Exportar como diagrama .mmd"
   }
 }
 

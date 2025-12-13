@@ -250,6 +250,40 @@ export const getTaskVisibleFieldValues = async (taskId, boardId) => {
   return response.data;
 };
 
+/**
+ * Get all custom field values for all tasks in a board (for export).
+ * @param {number} boardId - Board ID
+ * @param {array} tasks - Array of task objects
+ * @returns {object} Map of taskId -> array of custom field values
+ */
+export const getAllTasksCustomFields = async (boardId, tasks) => {
+  const customFieldsMap = {};
+  
+  // Get field definitions first
+  const definitions = await getCustomFieldDefinitions(boardId);
+  const defMap = {};
+  definitions.forEach(def => {
+    defMap[def.id] = def.name;
+  });
+  
+  // Fetch custom fields for each task in parallel
+  const promises = tasks.map(async (task) => {
+    try {
+      const values = await getTaskCustomFieldValues(task.id);
+      customFieldsMap[task.id] = values.map(v => ({
+        fieldDefinitionId: v.fieldDefinitionId,
+        fieldName: defMap[v.fieldDefinitionId] || `Field ${v.fieldDefinitionId}`,
+        value: v.value
+      }));
+    } catch (err) {
+      customFieldsMap[task.id] = [];
+    }
+  });
+  
+  await Promise.all(promises);
+  return customFieldsMap;
+};
+
 // ==================== Board Templates ====================
 
 /**
