@@ -26,6 +26,8 @@ const CustomFieldManager = ({ boardId, onClose }) => {
   const [error, setError] = useState(null);
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
   
   // Form state
   const [formData, setFormData] = useState({
@@ -69,6 +71,11 @@ const CustomFieldManager = ({ boardId, onClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return; // Prevent double-submit
+    
+    setIsSubmitting(true);
+    setError(null);
+    
     try {
       const payload = {
         ...formData,
@@ -83,10 +90,12 @@ const CustomFieldManager = ({ boardId, onClose }) => {
       }
       
       resetForm();
-      fetchDefinitions();
+      await fetchDefinitions();
     } catch (err) {
       setError(t('board.failedToSaveCustomField'));
       console.error(err);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -103,15 +112,22 @@ const CustomFieldManager = ({ boardId, onClose }) => {
   };
 
   const handleDelete = async (id) => {
+    if (deletingId) return; // Prevent double-click
     if (!window.confirm(t('board.deleteCustomFieldConfirm'))) {
       return;
     }
+    
+    setDeletingId(id);
+    setError(null);
+    
     try {
       await deleteCustomFieldDefinition(id);
-      fetchDefinitions();
+      await fetchDefinitions();
     } catch (err) {
       setError(t('board.failedToDeleteCustomField'));
       console.error(err);
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -203,10 +219,11 @@ const CustomFieldManager = ({ boardId, onClose }) => {
                       </button>
                       <button
                         onClick={() => handleDelete(def.id)}
-                        className="text-base-08 hover:text-base-08/80 text-sm"
+                        disabled={deletingId === def.id}
+                        className="text-base-08 hover:text-base-08/80 text-sm disabled:opacity-50"
                       >
-                        <i className="fas fa-trash mr-1" aria-hidden="true"></i>
-                        {t('common.delete')}
+                        <i className={`fas ${deletingId === def.id ? 'fa-spinner fa-spin' : 'fa-trash'} mr-1`} aria-hidden="true"></i>
+                        {deletingId === def.id ? t('common.deleting') : t('common.delete')}
                       </button>
                     </div>
                   </div>
@@ -328,17 +345,19 @@ const CustomFieldManager = ({ boardId, onClose }) => {
                   <button
                     type="button"
                     onClick={resetForm}
-                    className="px-4 py-2 text-base-05 hover:text-base-05 hover:bg-base-01 dark:hover:bg-base-02 rounded"
+                    disabled={isSubmitting}
+                    className="px-4 py-2 text-base-05 hover:text-base-05 hover:bg-base-01 dark:hover:bg-base-02 rounded disabled:opacity-50"
                   >
                     <i className="fas fa-times mr-2" aria-hidden="true"></i>
                     {t('common.cancel')}
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-base-0D text-base-07 rounded hover:bg-base-0D/90"
+                    disabled={isSubmitting}
+                    className="px-4 py-2 bg-base-0D text-base-07 rounded hover:bg-base-0D/90 disabled:opacity-50"
                   >
-                    <i className={`fas fa-${editingId ? 'save' : 'plus'} mr-2`} aria-hidden="true"></i>
-                    {editingId ? t('board.saveChanges') : t('board.addField')}
+                    <i className={`fas ${isSubmitting ? 'fa-spinner fa-spin' : (editingId ? 'fa-save' : 'fa-plus')} mr-2`} aria-hidden="true"></i>
+                    {isSubmitting ? t('common.saving') : (editingId ? t('board.saveChanges') : t('board.addField'))}
                   </button>
                 </div>
               </div>

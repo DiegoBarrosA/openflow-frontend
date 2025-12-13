@@ -293,8 +293,8 @@ function NavigationBar() {
                           {username?.charAt(0).toUpperCase() || 'U'}
                         </div>
                       )}
-                      <div>
-                        <p className="text-sm font-medium text-base-05">{username}</p>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-base-05 truncate max-w-[120px]" title={username}>{username}</p>
                         <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
                           role === ROLES.ADMIN 
                             ? 'bg-base-0E/20 text-base-0E' 

@@ -19,6 +19,8 @@ function Board() {
   const [board, setBoard] = useState(null);
   const [statuses, setStatuses] = useState([]);
   const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [showStatusForm, setShowStatusForm] = useState(false);
   const [showTaskForm, setShowTaskForm] = useState(false);
   const [selectedStatusId, setSelectedStatusId] = useState(null);
@@ -53,9 +55,19 @@ function Board() {
   const exportMenuRef = useRef(null);
 
   useEffect(() => {
-    fetchBoard();
-    fetchStatuses();
-    fetchTasks();
+    const loadBoardData = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        await Promise.all([fetchBoard(), fetchStatuses(), fetchTasks()]);
+      } catch (err) {
+        console.error('Error loading board data:', err);
+        setError(t('board.failedToLoadBoard'));
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadBoardData();
   }, [id]);
 
   // Close export menu when clicking outside
@@ -138,29 +150,25 @@ function Board() {
   }, [board, editLayoutMode, showStatusForm, setBoardActions, t, isAdmin, id]);
 
   const fetchBoard = async () => {
-    try {
-      const response = await api.get(`/boards/${id}`);
-      setBoard(response.data);
-    } catch (err) {
-      console.error('Error fetching board:', err);
-    }
+    const response = await api.get(`/boards/${id}`);
+    setBoard(response.data);
   };
 
   const fetchStatuses = async () => {
-    try {
-      const response = await api.get(`/statuses/board/${id}`);
-      setStatuses(response.data);
-    } catch (err) {
-      console.error('Error fetching statuses:', err);
-    }
+    const response = await api.get(`/statuses/board/${id}`);
+    setStatuses(response.data);
   };
 
   const fetchTasks = async () => {
+    const response = await api.get(`/tasks?boardId=${id}`);
+    setTasks(response.data);
+  };
+
+  const refreshData = async () => {
     try {
-      const response = await api.get(`/tasks?boardId=${id}`);
-      setTasks(response.data);
+      await Promise.all([fetchBoard(), fetchStatuses(), fetchTasks()]);
     } catch (err) {
-      console.error('Error fetching tasks:', err);
+      console.error('Error refreshing board data:', err);
     }
   };
 
@@ -305,13 +313,27 @@ function Board() {
     e.preventDefault();
     if (!selectedStatusId) return;
     try {
-      const response = await api.post('/tasks', {
+      // Filter out empty custom field values and convert keys to proper format
+      const filteredCustomFields = {};
+      Object.entries(newTaskCustomFields).forEach(([key, value]) => {
+        if (value !== null && value !== undefined && value !== '') {
+          filteredCustomFields[key] = String(value);
+        }
+      });
+      
+      const taskData = {
         title: newTaskTitle,
         description: newTaskDescription,
         statusId: selectedStatusId,
         boardId: parseInt(id),
-        customFieldValues: newTaskCustomFields,
-      });
+      };
+      
+      // Only include customFieldValues if there are any
+      if (Object.keys(filteredCustomFields).length > 0) {
+        taskData.customFieldValues = filteredCustomFields;
+      }
+      
+      const response = await api.post('/tasks', taskData);
       setTasks([...tasks, response.data]);
       setNewTaskTitle('');
       setNewTaskDescription('');
@@ -429,12 +451,32 @@ function Board() {
     return tasks.filter((task) => task.statusId === statusId);
   };
 
-  if (!board) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-base-00" role="status" aria-live="polite">
         <div className="text-base-05 text-base sm:text-lg">
           <i className="fas fa-spinner fa-spin mr-2" aria-hidden="true"></i>
           {t('common.loading')}
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !board) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-base-00" role="alert">
+        <div className="text-center">
+          <i className="fas fa-exclamation-circle text-4xl text-base-08 mb-4" aria-hidden="true"></i>
+          <p className="text-base-05 text-base sm:text-lg mb-4">
+            {error || t('board.boardNotFound')}
+          </p>
+          <button
+            onClick={() => navigate('/boards')}
+            className="bg-base-0D text-base-07 px-4 py-2 rounded-md hover:bg-base-0D/90 transition-colors"
+          >
+            <i className="fas fa-arrow-left mr-2" aria-hidden="true"></i>
+            {t('board.goToBoards')}
+          </button>
         </div>
       </div>
     );

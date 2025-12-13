@@ -68,26 +68,62 @@ export const generateMarkdown = (board, statuses, tasks, customFieldsMap = {}) =
 };
 
 /**
+ * Convert hex color to CSS color with alpha for backgrounds
+ * @param {string} hex - Hex color code (e.g., "#0079bf")
+ * @returns {string} CSS color
+ */
+const hexToRgba = (hex, alpha = 0.15) => {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  if (result) {
+    const r = parseInt(result[1], 16);
+    const g = parseInt(result[2], 16);
+    const b = parseInt(result[3], 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+  return hex;
+};
+
+/**
  * Export board data to Mermaid Kanban format
  * Following: https://mermaid.js.org/syntax/kanban.html
  * @param {object} board - Board object with name
- * @param {array} statuses - Array of status objects
+ * @param {array} statuses - Array of status objects (with color property)
  * @param {array} tasks - Array of task objects
  * @param {object} customFieldsMap - Map of taskId -> array of custom field values
  * @returns {string} Mermaid Kanban content
  */
 export const generateMermaidKanban = (board, statuses, tasks, customFieldsMap = {}) => {
+  // Build column styles based on status colors
+  const columnStyles = {};
+  statuses.forEach((status) => {
+    const statusId = toSafeId(status.name);
+    if (status.color) {
+      columnStyles[statusId] = status.color;
+    }
+  });
+  
   let mermaid = `---\nconfig:\n  kanban:\n    ticketBaseUrl: ''\n---\nkanban\n`;
+  
+  // Add a comment with color legend for reference
+  if (Object.keys(columnStyles).length > 0) {
+    mermaid = `%%{init: {'theme': 'base'}}%%\n` + mermaid;
+    mermaid += `%% Column Colors: ${statuses.map(s => `${s.name}: ${s.color || 'default'}`).join(', ')} %%\n`;
+  }
 
   statuses.forEach((status) => {
     const statusTasks = tasks.filter((task) => task.statusId === status.id);
     const statusId = toSafeId(status.name);
     
-    // Column definition - use brackets if name has spaces
+    // Column definition - use brackets if name has spaces, add color indicator in comment
     if (status.name.includes(' ')) {
       mermaid += `  ${statusId}[${status.name}]\n`;
     } else {
       mermaid += `  ${statusId}\n`;
+    }
+    
+    // Add column metadata with color styling if available
+    if (status.color) {
+      mermaid += `    @{ style: 'background-color: ${hexToRgba(status.color, 0.2)}; border-left: 4px solid ${status.color}' }\n`;
     }
     
     // Tasks in this column
