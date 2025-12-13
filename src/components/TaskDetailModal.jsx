@@ -106,14 +106,18 @@ function TaskDetailModal({ task, boardId, onClose, onUpdate, onDelete }) {
                 <span className="text-lg font-semibold">{t('task.savedSuccessfully')}</span>
               </div>
             ) : isEditing ? (
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="flex-1 text-lg sm:text-xl font-bold text-base-05 bg-base-07 dark:bg-base-00 px-3 py-2 border border-base-03 dark:border-base-02 rounded-md focus:outline-none focus:ring-2 focus:ring-base-0D focus:border-transparent"
-                placeholder={t('task.taskTitle')}
-                autoFocus
-              />
+              <div className="flex-1">
+                <input
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value.slice(0, 200))}
+                  maxLength={200}
+                  className="w-full text-lg sm:text-xl font-bold text-base-05 bg-base-07 dark:bg-base-00 px-3 py-2 border border-base-03 dark:border-base-02 rounded-md focus:outline-none focus:ring-2 focus:ring-base-0D focus:border-transparent"
+                  placeholder={t('task.taskTitle')}
+                  autoFocus
+                />
+                <div className="text-xs text-base-04 text-right mt-1">{title.length}/200</div>
+              </div>
             ) : (
               <h2 id="task-detail-title" className="text-lg sm:text-xl font-bold text-base-05 truncate">
                 {task.title}
@@ -188,12 +192,16 @@ function TaskDetailModal({ task, boardId, onClose, onUpdate, onDelete }) {
                 {t('task.description')}
               </label>
               {isEditing ? (
-                <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  className="w-full px-4 py-3 border border-base-03 dark:border-base-02 rounded-md focus:outline-none focus:ring-2 focus:ring-base-0D focus:border-transparent min-h-[120px] resize-y text-base bg-base-07 dark:bg-base-00 text-base-05"
-                  placeholder={t('task.addDescription')}
-                />
+                <div>
+                  <textarea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value.slice(0, 1000))}
+                    maxLength={1000}
+                    className="w-full px-4 py-3 border border-base-03 dark:border-base-02 rounded-md focus:outline-none focus:ring-2 focus:ring-base-0D focus:border-transparent min-h-[120px] resize-y text-base bg-base-07 dark:bg-base-00 text-base-05"
+                    placeholder={t('task.addDescription')}
+                  />
+                  <div className="text-xs text-base-04 text-right mt-1">{description.length}/1000</div>
+                </div>
               ) : (
                 <div 
                   className="w-full px-4 py-3 bg-base-01 dark:bg-base-02 rounded-md text-base-05 min-h-[60px] cursor-pointer hover:bg-base-02 dark:hover:bg-base-03 transition-colors"
