@@ -312,7 +312,9 @@
     "markdown": "Markdown",
     "markdownDesc": "Exportar como archivo .md",
     "mermaid": "Mermaid Kanban",
-    "mermaidDesc": "Exportar como diagrama .mmd"
+    "mermaidDesc": "Exportar como diagrama .mmd",
+    "csv": "CSV",
+    "csvDesc": "Exportar como hoja de cálculo"
   }
 }
 

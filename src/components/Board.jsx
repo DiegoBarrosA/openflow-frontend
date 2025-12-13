@@ -8,7 +8,7 @@ import BoardAccessManager from './BoardAccessManager';
 import { useAuth, ROLES } from '../contexts/AuthContext';
 import { useTranslation } from '../contexts/I18nContext';
 import { useBoardActions } from '../contexts/BoardActionsContext';
-import { exportToMarkdown, exportToMermaid } from '../utils/exportUtils';
+import { exportToMarkdown, exportToMermaid, exportToCSV } from '../utils/exportUtils';
 
 function Board() {
   const { id } = useParams();
@@ -184,6 +184,8 @@ function Board() {
         exportToMarkdown(board, statuses, tasks, customFieldsMap);
       } else if (format === 'mermaid') {
         exportToMermaid(board, statuses, tasks, customFieldsMap);
+      } else if (format === 'csv') {
+        exportToCSV(board, statuses, tasks, customFieldsMap);
       }
     } catch (err) {
       console.error('Error exporting board:', err);
@@ -933,6 +935,16 @@ function Board() {
                 <div>
                   <p className="font-medium">{t('export.mermaid')}</p>
                   <p className="text-xs text-base-04">{t('export.mermaidDesc')}</p>
+                </div>
+              </button>
+              <button
+                onClick={() => handleExport('csv')}
+                className="w-full text-left px-4 py-3 text-sm text-base-05 hover:bg-base-01 dark:hover:bg-base-02 transition-colors flex items-center gap-3"
+              >
+                <i className="fas fa-file-csv text-lg" aria-hidden="true"></i>
+                <div>
+                  <p className="font-medium">{t('export.csv')}</p>
+                  <p className="text-xs text-base-04">{t('export.csvDesc')}</p>
                 </div>
               </button>
             </div>

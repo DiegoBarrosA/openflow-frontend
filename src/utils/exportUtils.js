@@ -218,3 +218,92 @@ export const exportToMermaid = (board, statuses, tasks, customFieldsMap = {}) =>
   downloadFile(content, filename, 'text/plain');
 };
 
+/**
+ * Escape a value for CSV (handle quotes and commas)
+ * @param {string} value - Value to escape
+ * @returns {string} Escaped value
+ */
+const escapeCSV = (value) => {
+  if (value === null || value === undefined) {
+    return '';
+  }
+  const str = String(value);
+  // If contains comma, newline, or quote, wrap in quotes and escape internal quotes
+  if (str.includes(',') || str.includes('\n') || str.includes('"')) {
+    return `"${str.replace(/"/g, '""')}"`;
+  }
+  return str;
+};
+
+/**
+ * Export board data to CSV format
+ * @param {object} board - Board object with name
+ * @param {array} statuses - Array of status objects
+ * @param {array} tasks - Array of task objects
+ * @param {object} customFieldsMap - Map of taskId -> array of custom field values
+ * @returns {string} CSV content
+ */
+export const generateCSV = (board, statuses, tasks, customFieldsMap = {}) => {
+  // Collect all unique custom field names
+  const customFieldNames = new Set();
+  Object.values(customFieldsMap).forEach((fields) => {
+    fields.forEach((field) => {
+      if (field.fieldName) {
+        customFieldNames.add(field.fieldName);
+      }
+    });
+  });
+  const customFieldColumns = Array.from(customFieldNames).sort();
+  
+  // Build status lookup
+  const statusMap = {};
+  statuses.forEach((status) => {
+    statusMap[status.id] = status.name;
+  });
+  
+  // CSV header
+  const headers = ['Status', 'Title', 'Description', 'Assignee', ...customFieldColumns];
+  let csv = headers.map(escapeCSV).join(',') + '\n';
+  
+  // Sort tasks by status order
+  const sortedTasks = [...tasks].sort((a, b) => {
+    const statusOrderA = statuses.findIndex((s) => s.id === a.statusId);
+    const statusOrderB = statuses.findIndex((s) => s.id === b.statusId);
+    return statusOrderA - statusOrderB;
+  });
+  
+  // CSV rows
+  sortedTasks.forEach((task) => {
+    const customFields = customFieldsMap[task.id] || [];
+    const customFieldValues = {};
+    customFields.forEach((field) => {
+      customFieldValues[field.fieldName] = field.value || '';
+    });
+    
+    const row = [
+      statusMap[task.statusId] || '',
+      task.title || '',
+      task.description || '',
+      task.assignedUsername || '',
+      ...customFieldColumns.map((fieldName) => customFieldValues[fieldName] || '')
+    ];
+    
+    csv += row.map(escapeCSV).join(',') + '\n';
+  });
+  
+  return csv;
+};
+
+/**
+ * Export board to CSV and download
+ * @param {object} board - Board object
+ * @param {array} statuses - Statuses array
+ * @param {array} tasks - Tasks array
+ * @param {object} customFieldsMap - Custom fields map
+ */
+export const exportToCSV = (board, statuses, tasks, customFieldsMap = {}) => {
+  const content = generateCSV(board, statuses, tasks, customFieldsMap);
+  const filename = `${board.name.replace(/[^a-z0-9]/gi, '_')}_export.csv`;
+  downloadFile(content, filename, 'text/csv;charset=utf-8');
+};
+
