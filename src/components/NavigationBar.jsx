@@ -7,7 +7,8 @@ import LanguageSwitcher from './LanguageSwitcher';
 import ThemeSwitcher from './ThemeSwitcher';
 import NotificationBell from './NotificationBell';
 import SubscribeButton from './SubscribeButton';
-import api, { azureLogin } from '../services/api';
+import ProfileModal from './ProfileModal';
+import api, { azureLogin, getCurrentUser } from '../services/api';
 
 /**
  * Unified NavigationBar component - context-aware navigation that adapts to current route
@@ -20,7 +21,9 @@ function NavigationBar() {
   const t = useTranslation();
   const { boardData } = useBoardActions();
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const [board, setBoard] = useState(null);
+  const [profilePictureUrl, setProfilePictureUrl] = useState(null);
   const menuRef = useRef(null);
 
   const username = getUsername();
@@ -49,6 +52,21 @@ function NavigationBar() {
       fetchBoard();
     }
   }, [isBoardView, isPublicBoardView, boardId, board, fetchBoard]);
+
+  // Fetch user profile picture
+  useEffect(() => {
+    const fetchProfilePicture = async () => {
+      if (isAuthenticated()) {
+        try {
+          const user = await getCurrentUser();
+          setProfilePictureUrl(user.profilePictureUrl);
+        } catch (err) {
+          console.error('Error fetching profile picture:', err);
+        }
+      }
+    };
+    fetchProfilePicture();
+  }, [isAuthenticated]);
 
   // Close user menu when clicking outside
   useEffect(() => {
@@ -247,18 +265,34 @@ function NavigationBar() {
                 aria-label="User menu"
                 aria-expanded={showUserMenu}
               >
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-base-0D flex items-center justify-center text-base-07 font-semibold text-sm sm:text-base">
-                  {username?.charAt(0).toUpperCase() || 'U'}
-                </div>
+                {profilePictureUrl ? (
+                  <img
+                    src={profilePictureUrl}
+                    alt={username}
+                    className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover border-2 border-base-0D"
+                  />
+                ) : (
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-base-0D flex items-center justify-center text-base-07 font-semibold text-sm sm:text-base">
+                    {username?.charAt(0).toUpperCase() || 'U'}
+                  </div>
+                )}
                 <i className={`fas fa-chevron-${showUserMenu ? 'up' : 'down'} text-base-04`} aria-hidden="true"></i>
               </button>
               {showUserMenu && (
                 <div className="absolute right-0 mt-2 w-48 sm:w-56 bg-base-07 dark:bg-base-01 rounded-md shadow-lg border border-base-02 dark:border-base-03 py-2 z-50">
                   <div className="px-4 py-3 border-b border-base-02 dark:border-base-03">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-base-0D flex items-center justify-center text-base-07 font-semibold">
-                        {username?.charAt(0).toUpperCase() || 'U'}
-                      </div>
+                      {profilePictureUrl ? (
+                        <img
+                          src={profilePictureUrl}
+                          alt={username}
+                          className="w-10 h-10 rounded-full object-cover border-2 border-base-0D"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-base-0D flex items-center justify-center text-base-07 font-semibold">
+                          {username?.charAt(0).toUpperCase() || 'U'}
+                        </div>
+                      )}
                       <div>
                         <p className="text-sm font-medium text-base-05">{username}</p>
                         <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
@@ -271,6 +305,16 @@ function NavigationBar() {
                       </div>
                     </div>
                   </div>
+                  <button
+                    onClick={() => {
+                      setShowUserMenu(false);
+                      setShowProfileModal(true);
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm text-base-05 hover:bg-base-01 dark:hover:bg-base-02 transition-colors"
+                  >
+                    <i className="fas fa-user-circle mr-2" aria-hidden="true"></i>
+                    {t('profile.myProfile')}
+                  </button>
                   <div className="px-4 py-2 border-b border-base-02 dark:border-base-03">
                     <LanguageSwitcher />
                   </div>
@@ -291,6 +335,17 @@ function NavigationBar() {
           )}
         </div>
       </div>
+
+      {/* Profile Modal */}
+      {showProfileModal && (
+        <ProfileModal
+          onClose={() => {
+            setShowProfileModal(false);
+            // Refresh profile picture after modal closes
+            getCurrentUser().then(user => setProfilePictureUrl(user.profilePictureUrl)).catch(() => {});
+          }}
+        />
+      )}
     </header>
   );
 }

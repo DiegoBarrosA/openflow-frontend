@@ -3,6 +3,7 @@ import CustomFields from './CustomFields';
 import ChangeHistory from './ChangeHistory';
 import SubscribeButton from './SubscribeButton';
 import TaskComments from './TaskComments';
+import TaskAttachments from './TaskAttachments';
 import { getAllUsers } from '../services/api';
 import { useTranslation } from '../contexts/I18nContext';
 
@@ -202,6 +203,11 @@ function TaskDetailModal({ task, boardId, onClose, onUpdate, onDelete }) {
                 boardId={boardId} 
                 readOnly={false}
               />
+            </div>
+
+            {/* Attachments */}
+            <div className="border-t border-base-02 dark:border-base-03 pt-4">
+              <TaskAttachments taskId={task.id} />
             </div>
 
             {/* Comments */}

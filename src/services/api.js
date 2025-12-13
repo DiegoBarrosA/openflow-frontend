@@ -464,5 +464,97 @@ export const revokeBoardAccess = async (boardId, userId) => {
   await api.delete(`/boards/${boardId}/access/${userId}`);
 };
 
+// ==================== Attachments ====================
+
+/**
+ * Check if S3 storage is enabled.
+ */
+export const getAttachmentStatus = async () => {
+  const response = await api.get('/attachments/status');
+  return response.data;
+};
+
+/**
+ * Get all attachments for a task.
+ * @param {number} taskId - Task ID
+ */
+export const getTaskAttachments = async (taskId) => {
+  const response = await api.get(`/attachments/task/${taskId}`);
+  return response.data;
+};
+
+/**
+ * Upload an attachment to a task.
+ * @param {number} taskId - Task ID
+ * @param {File} file - File to upload
+ */
+export const uploadAttachment = async (taskId, file) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  const response = await api.post(`/attachments/task/${taskId}`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  return response.data;
+};
+
+/**
+ * Get download URL for an attachment.
+ * @param {number} attachmentId - Attachment ID
+ */
+export const getAttachmentDownloadUrl = async (attachmentId) => {
+  const response = await api.get(`/attachments/${attachmentId}/download`);
+  return response.data;
+};
+
+/**
+ * Delete an attachment.
+ * @param {number} attachmentId - Attachment ID
+ */
+export const deleteAttachment = async (attachmentId) => {
+  await api.delete(`/attachments/${attachmentId}`);
+};
+
+// ==================== User Profile ====================
+
+/**
+ * Upload profile picture.
+ * @param {File} file - Image file to upload
+ */
+export const uploadProfilePicture = async (file) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  const response = await api.post('/users/me/profile-picture', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  return response.data;
+};
+
+/**
+ * Get profile picture URL.
+ */
+export const getProfilePictureUrl = async () => {
+  const response = await api.get('/users/me/profile-picture');
+  return response.data;
+};
+
+/**
+ * Delete profile picture.
+ */
+export const deleteProfilePicture = async () => {
+  await api.delete('/users/me/profile-picture');
+};
+
+/**
+ * Get current user info.
+ */
+export const getCurrentUser = async () => {
+  const response = await api.get('/users/me');
+  return response.data;
+};
+
 export default api;
 

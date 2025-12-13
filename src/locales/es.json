@@ -194,6 +194,7 @@
   },
   "task": {
     "title": "Título",
+    "description": "Descripción",
     "status": "Estado",
     "assignee": "Asignado a",
     "dueDate": "Fecha de Vencimiento",
@@ -274,6 +275,33 @@
     "light": "Claro",
     "dark": "Oscuro",
     "toggleTheme": "Cambiar tema"
+  },
+  "attachment": {
+    "title": "Archivos Adjuntos",
+    "notEnabled": "Los archivos adjuntos no están disponibles",
+    "dragDrop": "Arrastra archivos aquí o haz clic para explorar",
+    "maxSize": "Tamaño máximo: 10MB",
+    "uploading": "Subiendo...",
+    "uploadFailed": "Error al subir archivo",
+    "downloadFailed": "Error al obtener enlace de descarga",
+    "deleteFailed": "Error al eliminar archivo adjunto",
+    "deleteConfirm": "¿Estás seguro de que quieres eliminar este archivo adjunto?",
+    "download": "Descargar"
+  },
+  "profile": {
+    "title": "Mi Perfil",
+    "myProfile": "Mi Perfil",
+    "picture": "Foto de Perfil",
+    "uploadPicture": "Subir Foto",
+    "username": "Nombre de usuario",
+    "email": "Correo electrónico",
+    "role": "Rol",
+    "loadFailed": "Error al cargar perfil",
+    "uploadFailed": "Error al subir foto",
+    "deleteFailed": "Error al eliminar foto",
+    "deleteConfirm": "¿Estás seguro de que quieres eliminar tu foto de perfil?",
+    "invalidFileType": "Por favor selecciona un archivo de imagen",
+    "fileTooLarge": "El archivo debe ser menor a 5MB"
   }
 }
 
