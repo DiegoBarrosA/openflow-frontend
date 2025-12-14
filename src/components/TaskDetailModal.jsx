@@ -195,12 +195,12 @@ function TaskDetailModal({ task, boardId, onClose, onUpdate, onDelete }) {
                 <div>
                   <textarea
                     value={description}
-                    onChange={(e) => setDescription(e.target.value.slice(0, 1000))}
-                    maxLength={1000}
+                    onChange={(e) => setDescription(e.target.value.slice(0, 255))}
+                    maxLength={255}
                     className="w-full px-4 py-3 border border-base-03 dark:border-base-02 rounded-md focus:outline-none focus:ring-2 focus:ring-base-0D focus:border-transparent min-h-[120px] resize-y text-base bg-base-07 dark:bg-base-00 text-base-05"
                     placeholder={t('task.addDescription')}
                   />
-                  <div className="text-xs text-base-04 text-right mt-1">{description.length}/1000</div>
+                  <div className="text-xs text-base-04 text-right mt-1">{description.length}/255</div>
                 </div>
               ) : (
                 <div 

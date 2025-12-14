@@ -123,11 +123,27 @@
 
 **Root Cause**: No client-side validation or character limits on input fields.
 
-**Solution**: Added `maxLength` attributes and character counters to title (200 chars) and description (1000 chars) fields in:
+**Solution**: Added `maxLength` attributes and character counters to title (200 chars) and description (255 chars) fields in:
 - Task creation form in `Board.jsx`
 - Task edit form in `TaskDetailModal.jsx`
 
 **Files Modified**:
 - `src/components/Board.jsx`
 - `src/components/TaskDetailModal.jsx`
+
+---
+
+### BUG-010: Description column too small in Oracle (Fixed: 2025-12-14)
+
+**Problem**: Creating tasks with descriptions over 255 characters caused `ORA-12899: value too large for column "ADMIN"."TASKS"."DESCRIPTION" (actual: 1000, maximum: 255)`.
+
+**Root Cause**: Oracle created the column with default VARCHAR2(255) but the backend model allowed up to 1000 characters.
+
+**Solution**: Aligned all limits to 255 characters:
+- Updated `Task.java` model: `@Size(max = 255)` and `@Column(length = 255)`
+- Updated frontend character limits from 1000 to 255
+
+**Files Modified**:
+- Backend: `Task.java`
+- Frontend: `Board.jsx`, `TaskDetailModal.jsx`
 

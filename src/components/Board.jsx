@@ -683,13 +683,13 @@ function Board() {
                 <textarea
                   id="task-description"
                   value={newTaskDescription}
-                  onChange={(e) => setNewTaskDescription(e.target.value.slice(0, 1000))}
-                  maxLength={1000}
+                  onChange={(e) => setNewTaskDescription(e.target.value.slice(0, 255))}
+                  maxLength={255}
                   className="w-full px-4 py-3 sm:py-2.5 border border-base-03 dark:border-base-02 rounded-md focus:outline-none focus:ring-2 focus:ring-base-0D focus:border-transparent min-h-[80px] resize-y text-base bg-base-07 dark:bg-base-00 text-base-05"
                   aria-label={t('task.description')}
                 />
                 <div className="text-xs text-base-04 text-right mt-1">
-                  {newTaskDescription.length}/1000
+                  {newTaskDescription.length}/255
                 </div>
               </div>
               
