@@ -33,19 +33,25 @@
 
 ---
 
-### BUG-003: Custom fields 500 error - Oracle reserved word (Fixed: 2025-12-13)
+### BUG-003: Custom fields 500 error - Oracle reserved word (Fixed: 2025-12-14)
 
 **Problem**: All custom field operations returned HTTP 500 Internal Server Error.
 
 **Root Cause**: The column name `value` in `custom_field_values` table is a reserved word in Oracle, causing: `ORA-00904: "CFV1_0"."value": invalid identifier`
 
-**Solution**: 
-- Renamed column from `"value"` to `field_value` in `CustomFieldValue.java`
-- Added Flyway migration `V5__rename_value_column.sql` to rename the column in the database
+**Solution Attempts**:
+1. ~~Flyway migration to rename column~~ - Flyway not configured in project
+2. ~~`globally_quoted_identifiers=true`~~ - Caused ORA-00942 (tables not found) because Hibernate generates lowercase names with quotes, but Oracle stores table names in UPPERCASE
+3. ~~`@Column(name = "\"VALUE\"")`~~ - Hibernate still converted to lowercase
+4. ~~`@Column(name = "\`VALUE\`")`~~ - Backticks didn't preserve case either
+
+**Final Solution**: 
+- Renamed Java property from `value` to `fieldValue`
+- Used `@Column(name = "field_value")` - Hibernate creates new column with `ddl-auto=update`
+- Added `getValue()`/`setValue()` alias methods for backward compatibility
 
 **Files Modified (Backend)**:
 - `src/main/java/com/openflow/model/CustomFieldValue.java`
-- `src/main/resources/db/migration/V5__rename_value_column.sql`
 
 ---
 
@@ -146,4 +152,53 @@
 **Files Modified**:
 - Backend: `Task.java`
 - Frontend: `Board.jsx`, `TaskDetailModal.jsx`
+
+---
+
+### BUG-011: globally_quoted_identifiers breaks Oracle (Fixed: 2025-12-14)
+
+**Problem**: After enabling `hibernate.globally_quoted_identifiers=true`, all database queries failed with `ORA-00942: table or view does not exist`.
+
+**Root Cause**: With quoted identifiers enabled, Hibernate generates SQL like:
+```sql
+SELECT ... FROM "custom_field_definitions" ...
+```
+Oracle is **case-sensitive** when using double quotes. Tables were created as `CUSTOM_FIELD_DEFINITIONS` (uppercase), but Hibernate queried for `"custom_field_definitions"` (lowercase).
+
+**Solution**: Removed `globally_quoted_identifiers=true` from `application.properties`. This setting should never be used with Oracle unless all table/column names match the case Hibernate generates.
+
+**Files Modified (Backend)**:
+- `src/main/resources/application.properties`
+
+---
+
+### BUG-012: TaskController silently swallowing errors (Fixed: 2025-12-14)
+
+**Problem**: Task creation failures returned HTTP 400 with no indication of the actual error, making debugging extremely difficult.
+
+**Root Cause**: All catch blocks in `TaskController.java` caught `RuntimeException` and returned `badRequest().build()` without logging.
+
+**Solution**: Added SLF4J logger and error logging to all catch blocks:
+```java
+logger.error("Error creating task: {}", e.getMessage(), e);
+```
+
+**Files Modified (Backend)**:
+- `src/main/java/com/openflow/controller/TaskController.java`
+
+---
+
+## Lessons Learned
+
+### Oracle Reserved Words
+Oracle has many reserved words (`VALUE`, `DATE`, `ORDER`, etc.). When using JPA with Oracle:
+1. **Avoid reserved words** as column names
+2. If unavoidable, **rename the Java property** and use a safe column name
+3. `globally_quoted_identifiers` causes more problems than it solves with Oracle
+4. Flyway migrations are the proper way to rename columns, but require explicit configuration
+
+### Debugging Production Issues
+1. **Always log exceptions** - silent catch blocks hide critical information
+2. **HAR files** are invaluable for debugging API errors
+3. **kubectl logs** combined with grep patterns help isolate issues quickly
 
